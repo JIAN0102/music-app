@@ -77,6 +77,7 @@
                   class="block w-full py-1.5 px-3 mt-2 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
                   type="password"
                   placeholder="Password"
+                  autocomplete
                 >
               </label>
             </div>
@@ -87,85 +88,110 @@
               Submit
             </button>
           </form>
-          <form v-show="authType === 'register'">
+          <VForm
+            v-show="authType === 'register'"
+            :validation-schema="schema"
+          >
             <div class="mb-3">
               <label
-                class="block"
+                class="inline-block mb-2"
                 for="registerName"
               >
                 Name
-                <input
-                  id="registerName"
-                  class="block w-full py-1.5 px-3 mt-2 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                  type="text"
-                  placeholder="Enter Name"
-                >
               </label>
+              <VField
+                id="registerName"
+                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
+                name="name"
+                type="text"
+                placeholder="Enter Name"
+              />
+              <ErrorMessage
+                class="text-red-600"
+                name="name"
+              />
             </div>
             <div class="mb-3">
               <label
-                class="block"
+                class="inline-block mb-2"
                 for="registerEmail"
               >
                 Email
-                <input
-                  id="registerEmail"
-                  class="block w-full py-1.5 px-3 mt-2 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                  type="email"
-                  placeholder="Enter Email"
-                >
               </label>
+              <VField
+                id="registerEmail"
+                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
+                name="email"
+                type="email"
+                placeholder="Enter Email"
+              />
+              <ErrorMessage
+                class="text-red-600"
+                name="email"
+              />
             </div>
             <div class="mb-3">
               <label
-                class="block"
+                class="inline-block mb-2"
                 for="registerAge"
               >
                 Age
-                <input
-                  id="registerAge"
-                  class="block w-full py-1.5 px-3 mt-2 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                  type="number"
-                >
               </label>
+              <VField
+                id="registerAge"
+                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
+                name="age"
+                type="number"
+              />
+              <ErrorMessage
+                class="text-red-600"
+                name="age"
+              />
             </div>
             <div class="mb-3">
               <label
-                class="block"
+                class="inline-block mb-2"
                 for="registerPassword"
               >
                 Password
-                <input
-                  id="registerPassword"
-                  class="block w-full py-1.5 px-3 mt-2 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                  type="password"
-                  placeholder="Password"
-                >
               </label>
+              <VField
+                id="registerPassword"
+                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
+                name="password"
+                type="password"
+                placeholder="Password"
+                autocomplete
+              />
+              <ErrorMessage
+                class="text-red-600"
+                name="password"
+              />
             </div>
             <div class="mb-3">
               <label
-                class="block"
+                class="inline-block mb-2"
                 for="registerConfirmPassword"
               >
                 Confirm Password
                 <input
                   id="registerConfirmPassword"
-                  class="block w-full py-1.5 px-3 mt-2 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
+                  class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
                   type="password"
                   placeholder="Confirm Password"
+                  autocomplete
                 >
               </label>
             </div>
             <div class="mb-3">
               <label
-                class="block"
+                class="inline-block mb-2"
                 for="registerCountry"
               >
                 Country
                 <select
                   id="registerCountry"
-                  class="block w-full py-1.5 px-3 mt-2 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
+                  class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
                 >
                   <option value="USA">
                     USA
@@ -198,7 +224,7 @@
             >
               Submit
             </button>
-          </form>
+          </VForm>
         </div>
       </div>
     </div>
@@ -213,6 +239,16 @@ export default {
   data() {
     return {
       authType: 'login',
+      schema: {
+        name: 'required|min:3|max:100|alpha_spaces',
+        email: 'required|min:3|max:100|email',
+        age: '',
+        password: '',
+        confirmPassowrd: '',
+        country: '',
+        terms: '',
+        tos: '',
+      },
     };
   },
   computed: {

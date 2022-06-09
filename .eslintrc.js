@@ -13,6 +13,7 @@ module.exports = {
     'no-console': 'off',
     'no-debugger': 'off',
     'vue/no-multiple-template-root': 'off',
+    'vuejs-accessibility/label-has-for': 'off',
     'max-len': 'off',
   },
 
