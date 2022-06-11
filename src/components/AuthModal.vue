@@ -51,180 +51,8 @@
               >Register</a>
             </li>
           </ul>
-          <form v-show="authType === 'login'">
-            <div class="mb-3">
-              <label
-                class="block"
-                for="loginEmail"
-              >
-                Email
-                <input
-                  id="loginEmail"
-                  class="block w-full py-1.5 px-3 mt-2 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                  type="email"
-                  placeholder="Enter Email"
-                >
-              </label>
-            </div>
-            <div class="mb-3">
-              <label
-                class="block"
-                for="loginPassword"
-              >
-                Password
-                <input
-                  id="loginPassword"
-                  class="block w-full py-1.5 px-3 mt-2 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                  type="password"
-                  placeholder="Password"
-                  autocomplete
-                >
-              </label>
-            </div>
-            <button
-              type="submit"
-              class="block w-full bg-purple-600 text-white py-1.5 px-3 rounded transition hover:bg-purple-700"
-            >
-              Submit
-            </button>
-          </form>
-          <VForm
-            v-show="authType === 'register'"
-            :validation-schema="schema"
-          >
-            <div class="mb-3">
-              <label
-                class="inline-block mb-2"
-                for="registerName"
-              >
-                Name
-              </label>
-              <VField
-                id="registerName"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                name="name"
-                type="text"
-                placeholder="Enter Name"
-              />
-              <ErrorMessage
-                class="text-red-600"
-                name="name"
-              />
-            </div>
-            <div class="mb-3">
-              <label
-                class="inline-block mb-2"
-                for="registerEmail"
-              >
-                Email
-              </label>
-              <VField
-                id="registerEmail"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                name="email"
-                type="email"
-                placeholder="Enter Email"
-              />
-              <ErrorMessage
-                class="text-red-600"
-                name="email"
-              />
-            </div>
-            <div class="mb-3">
-              <label
-                class="inline-block mb-2"
-                for="registerAge"
-              >
-                Age
-              </label>
-              <VField
-                id="registerAge"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                name="age"
-                type="number"
-              />
-              <ErrorMessage
-                class="text-red-600"
-                name="age"
-              />
-            </div>
-            <div class="mb-3">
-              <label
-                class="inline-block mb-2"
-                for="registerPassword"
-              >
-                Password
-              </label>
-              <VField
-                id="registerPassword"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                name="password"
-                type="password"
-                placeholder="Password"
-                autocomplete
-              />
-              <ErrorMessage
-                class="text-red-600"
-                name="password"
-              />
-            </div>
-            <div class="mb-3">
-              <label
-                class="inline-block mb-2"
-                for="registerConfirmPassword"
-              >
-                Confirm Password
-                <input
-                  id="registerConfirmPassword"
-                  class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                  type="password"
-                  placeholder="Confirm Password"
-                  autocomplete
-                >
-              </label>
-            </div>
-            <div class="mb-3">
-              <label
-                class="inline-block mb-2"
-                for="registerCountry"
-              >
-                Country
-                <select
-                  id="registerCountry"
-                  class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                >
-                  <option value="USA">
-                    USA
-                  </option>
-                  <option value="Mexico">
-                    Mexico
-                  </option>
-                  <option value="Germany">
-                    Germany
-                  </option>
-                </select>
-              </label>
-            </div>
-            <div class="mb-3 pl-6">
-              <label
-                class="inline-block"
-                for="acceptTerms"
-              >
-                <input
-                  id="acceptTerms"
-                  class="w-4 h-4 float-left -ml-6 mt-1 rounded"
-                  type="checkbox"
-                >
-                Accept terms of service
-              </label>
-            </div>
-            <button
-              class="block w-full bg-purple-600 text-white py-1.5 px-3 rounded transition hover:bg-purple-700"
-              type="submit"
-            >
-              Submit
-            </button>
-          </VForm>
+          <LoginForm v-if="authType === 'login'" />
+          <RegisterForm v-else />
         </div>
       </div>
     </div>
@@ -233,29 +61,22 @@
 
 <script>
 import { mapState, mapMutations } from 'vuex';
+import LoginForm from '@/components/LoginForm.vue';
+import RegisterForm from '@/components/RegisterForm.vue';
 
 export default {
   name: 'AuthModal',
+  components: {
+    LoginForm,
+    RegisterForm,
+  },
   data() {
     return {
       authType: 'login',
-      schema: {
-        name: 'required|min:3|max:100|alpha_spaces',
-        email: 'required|min:3|max:100|email',
-        age: '',
-        password: '',
-        confirmPassowrd: '',
-        country: '',
-        terms: '',
-        tos: '',
-      },
     };
   },
   computed: {
     ...mapState(['authModalShow']),
-    // ...mapState({
-    //   modal: 'authModalShow',
-    // }),
   },
   methods: {
     ...mapMutations(['TOGGLE_AUTH_MODAL']),
