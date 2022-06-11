@@ -1,3 +1,28 @@
+<script>
+import { mapState, mapMutations } from 'vuex';
+import LoginForm from '@/components/LoginForm.vue';
+import RegisterForm from '@/components/RegisterForm.vue';
+
+export default {
+  name: 'AuthModal',
+  components: {
+    LoginForm,
+    RegisterForm,
+  },
+  data() {
+    return {
+      authType: 'login',
+    };
+  },
+  computed: {
+    ...mapState(['authModalShow']),
+  },
+  methods: {
+    ...mapMutations(['TOGGLE_AUTH_MODAL']),
+  },
+};
+</script>
+
 <template>
   <div
     id="modal"
@@ -58,28 +83,3 @@
     </div>
   </div>
 </template>
-
-<script>
-import { mapState, mapMutations } from 'vuex';
-import LoginForm from '@/components/LoginForm.vue';
-import RegisterForm from '@/components/RegisterForm.vue';
-
-export default {
-  name: 'AuthModal',
-  components: {
-    LoginForm,
-    RegisterForm,
-  },
-  data() {
-    return {
-      authType: 'login',
-    };
-  },
-  computed: {
-    ...mapState(['authModalShow']),
-  },
-  methods: {
-    ...mapMutations(['TOGGLE_AUTH_MODAL']),
-  },
-};
-</script>

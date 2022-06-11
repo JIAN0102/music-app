@@ -1,3 +1,54 @@
+<script>
+import { mapActions } from 'vuex';
+
+export default {
+  name: 'RegisterForm',
+  data() {
+    return {
+      registerSchema: {
+        name: 'required|min:3|max:100|alpha_spaces',
+        email: 'required|min:3|max:100|email',
+        age: 'required|min_value:18|max_value:100',
+        password: 'required|min:6|max:32',
+        confirmPassword: 'password_mismatch:@password',
+        country: 'required|country_excluded:Antarctica',
+        tos: 'tos',
+      },
+      userData: {
+        country: 'USA',
+      },
+      registrationInSubmission: false,
+      registrationShowAlert: false,
+      registrationAlertVariant: 'bg-blue-500',
+      registrationAlertMessage: 'Please wait! Your account is being created.',
+    };
+  },
+  methods: {
+    ...mapActions(['REGISTER']),
+    async register(values) {
+      this.registrationShowAlert = true;
+      this.registrationInSubmission = true;
+      this.registrationAlertVariant = 'bg-blue-500';
+      this.registrationAlertMessage = 'Please wait! Your account is being created.';
+
+      try {
+        await this.REGISTER(values);
+      } catch (error) {
+        this.registrationInSubmission = false;
+        this.registrationAlertVariant = 'bg-red-500';
+        this.registrationAlertMessage = 'An unexpected error occured. Please try again later.';
+        return;
+      }
+
+      this.registrationInSubmission = false;
+      this.registrationAlertVariant = 'bg-green-500';
+      this.registrationAlertMessage = 'Success! Your account has being created.';
+      window.location.reload();
+    },
+  },
+};
+</script>
+
 <template>
   <div
     v-if="registrationShowAlert"
@@ -52,24 +103,6 @@
     <div class="mb-3">
       <label
         class="inline-block mb-2"
-        for="registerAge"
-      >
-        Age
-      </label>
-      <VField
-        id="registerAge"
-        class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-        name="age"
-        type="number"
-      />
-      <ErrorMessage
-        class="text-red-600"
-        name="age"
-      />
-    </div>
-    <div class="mb-3">
-      <label
-        class="inline-block mb-2"
         for="registerPassword"
       >
         Password
@@ -114,6 +147,24 @@
       <ErrorMessage
         class="text-red-600"
         name="confirmPassword"
+      />
+    </div>
+    <div class="mb-3">
+      <label
+        class="inline-block mb-2"
+        for="registerAge"
+      >
+        Age
+      </label>
+      <VField
+        id="registerAge"
+        class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
+        name="age"
+        type="number"
+      />
+      <ErrorMessage
+        class="text-red-600"
+        name="age"
       />
     </div>
     <div class="mb-3">
@@ -175,41 +226,3 @@
     </button>
   </VForm>
 </template>
-
-<script>
-export default {
-  name: 'RegisterForm',
-  data() {
-    return {
-      registerSchema: {
-        name: 'required|min:3|max:100|alpha_spaces',
-        email: 'required|min:3|max:100|email',
-        age: 'required|min_value:18|max_value:100',
-        password: 'required|min:3|max:32',
-        confirmPassword: 'password_mismatch:@password',
-        country: 'required|country_excluded:Antarctica',
-        tos: 'tos',
-      },
-      userData: {
-        country: 'USA',
-      },
-      registrationInSubmission: false,
-      registrationShowAlert: false,
-      registrationAlertVariant: 'bg-blue-500',
-      registrationAlertMessage: 'Please wait! Your account is being created.',
-    };
-  },
-  methods: {
-    register(values) {
-      this.registrationShowAlert = true;
-      this.registrationInSubmission = true;
-      this.registrationAlertVariant = 'bg-blue-500';
-      this.registrationAlertMessage = 'Please wait! Your account is being created.';
-
-      this.registrationAlertVariant = 'bg-green-500';
-      this.registrationAlertMessage = 'Success! Your account has being created.';
-      console.log(values);
-    },
-  },
-};
-</script>

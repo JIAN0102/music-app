@@ -1,3 +1,45 @@
+<script>
+import { mapActions } from 'vuex';
+
+export default {
+  name: 'LoginForm',
+  data() {
+    return {
+      loginSchema: {
+        email: 'required|email',
+        password: 'required|min:6|max:32',
+      },
+      loginInSubmission: false,
+      loginShowAlert: false,
+      loginAlertVariant: 'bg-blue-500',
+      loginAlertMessage: 'Please wait! You are logging you in.',
+    };
+  },
+  methods: {
+    ...mapActions(['LOGIN']),
+    async login(values) {
+      this.loginShowAlert = true;
+      this.loginInSubmission = true;
+      this.loginAlertVariant = 'bg-blue-500';
+      this.loginAlertMessage = 'Please wait! You are logging you in.';
+
+      try {
+        await this.LOGIN(values);
+      } catch (error) {
+        this.loginInSubmission = false;
+        this.loginAlertVariant = 'bg-red-500';
+        this.loginAlertMessage = 'Invalid login details.';
+        return;
+      }
+
+      this.loginAlertVariant = 'bg-green-500';
+      this.loginAlertMessage = 'Success! You are now logged in.';
+      window.location.reload();
+    },
+  },
+};
+</script>
+
 <template>
   <div
     v-if="loginShowAlert"
@@ -58,33 +100,3 @@
     </button>
   </VForm>
 </template>
-
-<script>
-export default {
-  name: 'LoginForm',
-  data() {
-    return {
-      loginSchema: {
-        email: 'required|email',
-        password: 'required|min:3|max:32',
-      },
-      loginInSubmission: false,
-      loginShowAlert: false,
-      loginAlertVariant: 'bg-blue-500',
-      loginAlertMessage: 'Please wait! You are logging you in.',
-    };
-  },
-  methods: {
-    login(values) {
-      this.loginShowAlert = true;
-      this.loginInSubmission = true;
-      this.loginAlertVariant = 'bg-blue-500';
-      this.loginAlertMessage = 'Please wait! You are logging you in.';
-
-      this.loginAlertVariant = 'bg-green-500';
-      this.loginAlertMessage = 'Success! You are now logged in.';
-      console.log(values);
-    },
-  },
-};
-</script>

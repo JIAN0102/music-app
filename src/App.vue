@@ -1,3 +1,23 @@
+<script>
+import { mapActions } from 'vuex';
+import AppHeader from '@/components/AppHeader.vue';
+import AuthModal from '@/components/AuthModal.vue';
+
+export default {
+  name: 'App',
+  components: {
+    AppHeader,
+    AuthModal,
+  },
+  created() {
+    this.INIT_LOGIN();
+  },
+  methods: {
+    ...mapActions(['INIT_LOGIN']),
+  },
+};
+</script>
+
 <template>
   <AppHeader />
 
@@ -335,16 +355,3 @@
 
   <AuthModal />
 </template>
-
-<script>
-import AppHeader from '@/components/AppHeader.vue';
-import AuthModal from '@/components/AuthModal.vue';
-
-export default {
-  name: 'App',
-  components: {
-    AppHeader,
-    AuthModal,
-  },
-};
-</script>

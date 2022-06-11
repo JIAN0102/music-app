@@ -1,3 +1,18 @@
+<script>
+import { mapState, mapActions, mapMutations } from 'vuex';
+
+export default {
+  name: 'AppHeader',
+  computed: {
+    ...mapState(['userLoggedIn']),
+  },
+  methods: {
+    ...mapActions(['LOGOUT']),
+    ...mapMutations(['TOGGLE_AUTH_MODAL']),
+  },
+};
+</script>
+
 <template>
   <header
     id="header"
@@ -10,7 +25,7 @@
       >Music</a>
       <div class="flex flex-grow items-center">
         <ul class="flex flex-row mt-1">
-          <li>
+          <li v-if="!userLoggedIn">
             <a
               class="px-2 text-white"
               href="#"
@@ -19,30 +34,27 @@
               Login / Register
             </a>
           </li>
-          <li>
-            <a
-              class="px-2 text-white"
-              href="#"
-            >
-              Manage
-            </a>
-          </li>
+          <template v-else>
+            <li>
+              <a
+                class="px-2 text-white"
+                href="#"
+              >
+                Manage
+              </a>
+            </li>
+            <li>
+              <a
+                class="px-2 text-white"
+                href="#"
+                @click.prevent="LOGOUT"
+              >
+                Logout
+              </a>
+            </li>
+          </template>
         </ul>
       </div>
     </nav>
   </header>
 </template>
-
-<script>
-import { mapMutations } from 'vuex';
-
-export default {
-  name: 'AppHeader',
-  data() {
-    return {};
-  },
-  methods: {
-    ...mapMutations(['TOGGLE_AUTH_MODAL']),
-  },
-};
-</script>
