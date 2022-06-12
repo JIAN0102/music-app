@@ -2,7 +2,7 @@
 import { songsCollection, storage } from '@/includes/firebase';
 
 export default {
-  name: 'SongItem',
+  name: 'SongEditItem',
   props: {
     song: {
       type: Object,

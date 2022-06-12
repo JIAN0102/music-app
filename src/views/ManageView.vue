@@ -1,13 +1,13 @@
 <script>
 import { auth, songsCollection } from '@/includes/firebase';
 import UploadSong from '@/components/UploadSong.vue';
-import SongItem from '@/components/SongItem.vue';
+import SongEditItem from '@/components/SongEditItem.vue';
 
 export default ({
   name: 'ManageView',
   components: {
     UploadSong,
-    SongItem,
+    SongEditItem,
   },
   beforeRouteLeave(to, from, next) {
     if (!this.unsavedFlag) {
@@ -66,7 +66,7 @@ export default ({
             <i class="fa fa-compact-disc float-right text-green-400 text-2xl" />
           </div>
           <div class="p-6">
-            <SongItem
+            <SongEditItem
               v-for="(song, index) in songs"
               :key="song.docID"
               :song="song"
