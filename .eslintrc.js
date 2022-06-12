@@ -14,6 +14,7 @@ module.exports = {
     'no-debugger': 'off',
     'vue/no-multiple-template-root': 'off',
     'vuejs-accessibility/label-has-for': 'off',
+    'vuejs-accessibility/form-control-has-label': 'off',
     'max-len': 'off',
   },
 

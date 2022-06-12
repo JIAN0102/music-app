@@ -45,10 +45,15 @@ export default createStore({
     [REGISTER]: async ({ commit }, {
       name, email, password, age, country,
     }) => {
-      const userCredential = await auth.createUserWithEmailAndPassword(
-        email,
-        password,
-      );
+      let userCredential = null;
+      try {
+        userCredential = await auth.createUserWithEmailAndPassword(
+          email,
+          password,
+        );
+      } catch (error) {
+        console.log('錯誤訊息', error);
+      }
 
       await usersCollection.doc(userCredential.user.uid).set({
         name,

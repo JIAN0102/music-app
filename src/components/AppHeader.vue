@@ -9,6 +9,13 @@ export default {
   methods: {
     ...mapActions(['LOGOUT']),
     ...mapMutations(['TOGGLE_AUTH_MODAL']),
+    logout() {
+      this.LOGOUT();
+
+      if (this.$route.meta.requiresAuth) {
+        this.$router.push({ name: 'home' });
+      }
+    },
   },
 };
 </script>
@@ -19,12 +26,23 @@ export default {
     class="bg-gray-700"
   >
     <nav class="container mx-auto flex justify-start items-center py-5 px-4">
-      <a
+      <router-link
         class="text-white font-bold uppercase text-2xl mr-4"
-        href="#"
-      >Music</a>
+        :to="{ name: 'home' }"
+        exact-active-class="no-active"
+      >
+        Music
+      </router-link>
       <div class="flex flex-grow items-center">
         <ul class="flex flex-row mt-1">
+          <li>
+            <router-link
+              class="px-2 text-white"
+              :to="{ name: 'about' }"
+            >
+              About
+            </router-link>
+          </li>
           <li v-if="!userLoggedIn">
             <a
               class="px-2 text-white"
@@ -36,18 +54,18 @@ export default {
           </li>
           <template v-else>
             <li>
-              <a
+              <router-link
                 class="px-2 text-white"
-                href="#"
+                :to="{ name: 'manage' }"
               >
                 Manage
-              </a>
+              </router-link>
             </li>
             <li>
               <a
                 class="px-2 text-white"
                 href="#"
-                @click.prevent="LOGOUT"
+                @click.prevent="logout"
               >
                 Logout
               </a>
