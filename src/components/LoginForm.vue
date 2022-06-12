@@ -18,8 +18,8 @@ export default {
   methods: {
     ...mapActions(['LOGIN']),
     async login(values) {
-      this.loginShowAlert = true;
       this.loginInSubmission = true;
+      this.loginShowAlert = true;
       this.loginAlertVariant = 'bg-blue-500';
       this.loginAlertMessage = 'Please wait! You are logging you in.';
 

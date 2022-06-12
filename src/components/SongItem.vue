@@ -1,9 +1,15 @@
 <script>
+import { songsCollection, storage } from '@/includes/firebase';
+
 export default {
-  name: 'SongList',
+  name: 'SongItem',
   props: {
     song: {
       type: Object,
+      required: true,
+    },
+    index: {
+      type: Number,
       required: true,
     },
   },
@@ -15,11 +21,47 @@ export default {
         genre: 'alpha_spaces',
       },
       editSongInSubmission: false,
+      editSongShowAlert: false,
+      editSongAlertVariant: 'bg-blue-500',
+      editSongAlertMessage: 'Please wait! Updating song info.',
     };
   },
   methods: {
-    editSong() {
-      console.log('Song edited');
+    async editSong(values) {
+      this.editSongInSubmission = true;
+      this.editSongShowAlert = true;
+      this.editSongAlertVariant = 'bg-blue-500';
+      this.editSongAlertMessage = 'Please wait! Updating song info.';
+
+      try {
+        await songsCollection.doc(this.song.docID).update(values);
+      } catch (error) {
+        this.editSongInSubmission = false;
+        this.editSongAlertVariant = 'bg-red-500';
+        this.editSongAlertMessage = 'Something went wrong! Try again later.';
+        return;
+      }
+
+      this.$emit('update-song', this.index, values);
+      this.$emit('update-unsaved-flag', false);
+
+      this.editSongInSubmission = false;
+      this.editSongAlertVariant = 'bg-green-500';
+      this.editSongAlertMessage = 'Success!';
+    },
+    async deleteSong() {
+      const storageRef = storage.ref();
+      const songRef = storageRef.child(`songs/${this.song.originalName}`);
+
+      await songRef.delete();
+
+      await songsCollection.doc(this.song.docID).delete();
+
+      this.$emit('delete-song', this.index);
+    },
+    cancelEditSong() {
+      this.showEditForm = false;
+      this.$emit('update-unsaved-flag', false);
     },
   },
 };
@@ -33,6 +75,7 @@ export default {
       </h4>
       <button
         class="ml-1 py-1 px-2 text-sm rounded text-white bg-red-600 float-right"
+        @click.prevent="deleteSong"
       >
         <i class="fa fa-times" />
       </button>
@@ -44,6 +87,13 @@ export default {
       </button>
     </div>
     <div v-show="showEditForm">
+      <div
+        v-if="editSongShowAlert"
+        class="mb-4 p-5 font-bold text-white text-center"
+        :class="editSongAlertVariant"
+      >
+        {{ editSongAlertMessage }}
+      </div>
       <VForm
         :validation-schema="schema"
         :initial-values="song"
@@ -60,6 +110,7 @@ export default {
             type="text"
             name="modifiedName"
             placeholder="Enter Song Title"
+            @input="$emit('update-unsaved-flag', true)"
           />
           <ErrorMessage
             class="text-red-600"
@@ -77,6 +128,7 @@ export default {
             type="text"
             name="genre"
             placeholder="Enter Genre"
+            @input="$emit('update-unsaved-flag', true)"
           />
           <ErrorMessage
             class="text-red-600"
@@ -86,13 +138,14 @@ export default {
         <button
           type="submit"
           class="py-1.5 px-3 rounded text-white bg-green-600"
+          :disabled="editSongInSubmission"
         >
           Submit
         </button>
         <button
           type="button"
           class="ml-2 py-1.5 px-3 rounded text-white bg-gray-600"
-          @click="showEditForm = false"
+          @click.prevent="cancelEditSong"
         >
           Go Back
         </button>

@@ -26,8 +26,8 @@ export default {
   methods: {
     ...mapActions(['REGISTER']),
     async register(values) {
-      this.registrationShowAlert = true;
       this.registrationInSubmission = true;
+      this.registrationShowAlert = true;
       this.registrationAlertVariant = 'bg-blue-500';
       this.registrationAlertMessage = 'Please wait! Your account is being created.';
 
