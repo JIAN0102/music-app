@@ -2,7 +2,7 @@
 import { songsCollection, storage } from '@/includes/firebase';
 
 export default {
-  name: 'SongEditItem',
+  name: 'SongModify',
   props: {
     song: {
       type: Object,
@@ -13,6 +13,7 @@ export default {
       required: true,
     },
   },
+  emits: ['edit-song', 'delete-song', 'update-unsaved-flag'],
   data() {
     return {
       showEditForm: false,
@@ -42,7 +43,7 @@ export default {
         return;
       }
 
-      this.$emit('update-song', this.index, values);
+      this.$emit('edit-song', this.index, values);
       this.$emit('update-unsaved-flag', false);
 
       this.editSongInSubmission = false;

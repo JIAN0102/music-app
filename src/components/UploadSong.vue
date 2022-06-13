@@ -3,6 +3,7 @@ import { auth, songsCollection, storage } from '@/includes/firebase';
 
 export default {
   name: 'UploadSong',
+  emits: ['upload-song'],
   data() {
     return {
       isDragOver: false,
@@ -59,7 +60,7 @@ export default {
             const songRef = await songsCollection.add(song);
             const songSnapShot = await songRef.get();
 
-            this.$emit('add-song', songSnapShot);
+            this.$emit('upload-song', songSnapShot);
 
             this.uploads[uploadIndex].variant = 'bg-green-400';
             this.uploads[uploadIndex].icon = 'fas fa-check';

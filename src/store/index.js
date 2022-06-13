@@ -14,14 +14,14 @@ import {
 export default createStore({
   state: {
     authModalShow: false,
-    userLoggedIn: false,
+    isLoggedIn: false,
   },
   mutations: {
     [TOGGLE_AUTH_MODAL]: (state) => {
       state.authModalShow = !state.authModalShow;
     },
     [TOGGLE_AUTH]: (state) => {
-      state.userLoggedIn = !state.userLoggedIn;
+      state.isLoggedIn = !state.isLoggedIn;
     },
   },
   actions: {
@@ -52,7 +52,7 @@ export default createStore({
           password,
         );
       } catch (error) {
-        console.log('錯誤訊息', error);
+        console.log(error);
       }
 
       await usersCollection.doc(userCredential.user.uid).set({

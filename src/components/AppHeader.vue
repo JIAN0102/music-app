@@ -4,7 +4,7 @@ import { mapState, mapActions, mapMutations } from 'vuex';
 export default {
   name: 'AppHeader',
   computed: {
-    ...mapState(['userLoggedIn']),
+    ...mapState(['isLoggedIn']),
   },
   methods: {
     ...mapActions(['LOGOUT']),
@@ -43,7 +43,7 @@ export default {
               About
             </router-link>
           </li>
-          <li v-if="!userLoggedIn">
+          <li v-if="!isLoggedIn">
             <a
               class="px-2 text-white"
               href="#"

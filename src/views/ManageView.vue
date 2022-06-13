@@ -1,13 +1,13 @@
 <script>
 import { auth, songsCollection } from '@/includes/firebase';
 import UploadSong from '@/components/UploadSong.vue';
-import SongEditItem from '@/components/SongEditItem.vue';
+import SongModify from '@/components/SongModify.vue';
 
 export default ({
   name: 'ManageView',
   components: {
     UploadSong,
-    SongEditItem,
+    SongModify,
   },
   beforeRouteLeave(to, from, next) {
     if (!this.unsavedFlag) {
@@ -28,18 +28,18 @@ export default ({
       .where('uid', '==', auth.currentUser.uid)
       .get();
 
-    snapshot.forEach(this.addSong);
+    snapshot.forEach(this.uploadSong);
   },
   methods: {
-    addSong(document) {
+    uploadSong(document) {
       const song = {
-        ...document.data(),
         docID: document.id,
+        ...document.data(),
       };
 
       this.songs.push(song);
     },
-    updateSong(index, { modifiedName, genre }) {
+    editSong(index, { modifiedName, genre }) {
       this.songs[index].modifiedName = modifiedName;
       this.songs[index].genre = genre;
     },
@@ -57,7 +57,7 @@ export default ({
   <section class="container mx-auto mt-6">
     <div class="md:grid md:grid-cols-3 md:gap-4">
       <div class="col-span-1">
-        <UploadSong @add-song="addSong" />
+        <UploadSong @upload-song="uploadSong" />
       </div>
       <div class="col-span-2">
         <div class="bg-white rounded border border-gray-200 relative flex flex-col">
@@ -66,12 +66,12 @@ export default ({
             <i class="fa fa-compact-disc float-right text-green-400 text-2xl" />
           </div>
           <div class="p-6">
-            <SongEditItem
+            <SongModify
               v-for="(song, index) in songs"
               :key="song.docID"
               :song="song"
               :index="index"
-              @update-song="updateSong"
+              @edit-song="editSong"
               @delete-song="deleteSong"
               @update-unsaved-flag="updateUnsavedFlag"
             />
