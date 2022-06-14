@@ -5,16 +5,24 @@ import {
   LOGOUT,
   INIT_LOGIN,
   REGISTER,
+  NEW_SONG,
+  TOGGLE_SONG,
 } from '@/store/actions.type';
 import {
   TOGGLE_AUTH_MODAL,
   TOGGLE_AUTH,
 } from '@/store/mutations.type';
+import { Howl } from 'howler';
 
 export default createStore({
   state: {
     authModalShow: false,
     isLoggedIn: false,
+    currentSong: {},
+    sound: {},
+  },
+  getters: {
+    isSongPlaying: (state) => (state.sound.playing ? state.sound.playing() : false),
   },
   mutations: {
     [TOGGLE_AUTH_MODAL]: (state) => {
@@ -22,6 +30,13 @@ export default createStore({
     },
     [TOGGLE_AUTH]: (state) => {
       state.isLoggedIn = !state.isLoggedIn;
+    },
+    [NEW_SONG]: (state, payload) => {
+      state.currentSong = payload;
+      state.sound = new Howl({
+        src: [payload.url],
+        html5: true,
+      });
     },
   },
   actions: {
@@ -67,6 +82,22 @@ export default createStore({
       });
 
       commit('TOGGLE_AUTH');
+    },
+    [NEW_SONG]: async ({ state, commit }, payload) => {
+      commit('NEW_SONG', payload);
+
+      state.sound.play();
+    },
+    [TOGGLE_SONG]: ({ state }) => {
+      if (!state.sound.playing) {
+        return;
+      }
+
+      if (state.sound.playing()) {
+        state.sound.pause();
+      } else {
+        state.sound.play();
+      }
     },
   },
   modules: {

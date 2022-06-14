@@ -1,8 +1,8 @@
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { auth, songsCollection, commentsCollection } from '@/includes/firebase';
 
-export default ({
+export default {
   name: 'SongView',
   data() {
     return {
@@ -15,17 +15,28 @@ export default ({
       commentShowAlert: false,
       commentAlertVariant: 'bg-blue-500',
       commentAlertMessage: 'Please wait! Your comment is being submitted.',
-      sortType: '1',
+      sort: '1',
     };
   },
   computed: {
     ...mapState(['isLoggedIn']),
     sortedComments() {
       return this.comments.slice().sort((a, b) => {
-        if (this.sortType === '1') {
+        if (this.sort === '1') {
           return new Date(b.datePosted) - new Date(a.datePosted);
         }
         return new Date(a.datePosted) - new Date(b.datePosted);
+      });
+    },
+  },
+  watch: {
+    sort(newVal) {
+      if (newVal === this.$route.query.sort) {
+        return;
+      }
+
+      this.$router.push({
+        query: { sort: newVal },
       });
     },
   },
@@ -33,14 +44,21 @@ export default ({
     const snapshop = await songsCollection.doc(this.$route.params.id).get();
 
     if (!snapshop.exists) {
-      this.$router.push({ name: 'home' });
+      this.$router.push({
+        name: 'home',
+      });
       return;
     }
+
+    const { sort } = this.$route.query;
+
+    this.sort = sort === '1' || sort === '2' ? sort : '1';
 
     this.song = snapshop.data();
     this.getComments();
   },
   methods: {
+    ...mapActions(['NEW_SONG']),
     async sendComment(values, { resetForm }) {
       this.commentInSubmission = true;
       this.commentShowAlert = true;
@@ -56,6 +74,11 @@ export default ({
       };
 
       await commentsCollection.add(comment);
+
+      this.song.commentCount += 1;
+      await songsCollection.doc(this.$route.params.id).update({
+        commentCount: this.song.commentCount,
+      });
 
       this.getComments();
 
@@ -78,7 +101,7 @@ export default ({
       });
     },
   },
-});
+};
 </script>
 
 <template>
@@ -90,8 +113,8 @@ export default ({
     <div class="container mx-auto flex items-center">
       <button
         type="button"
-        class="z-50 h-24 w-24 text-3xl bg-white text-black rounded-full
-        focus:outline-none"
+        class="z-50 h-24 w-24 text-3xl bg-white text-black rounded-full focus:outline-none"
+        @click.prevent="NEW_SONG(song)"
       >
         <i class="fas fa-play" />
       </button>
@@ -106,7 +129,7 @@ export default ({
   <section class="container mx-auto mt-6">
     <div class="bg-white rounded border border-gray-200 relative flex flex-col">
       <div class="px-6 pt-6 pb-5 font-bold border-b border-gray-200">
-        <span class="card-title">Comments (15)</span>
+        <span class="card-title">Comments ({{ song.commentCount }})</span>
         <i class="fa fa-comments float-right text-green-400 text-2xl" />
       </div>
       <div class="p-6">
@@ -123,8 +146,7 @@ export default ({
           @submit="sendComment"
         >
           <VField
-            class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition
-              duration-500 focus:outline-none focus:border-black rounded mb-4"
+            class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded mb-4"
             placeholder="Your comment here..."
             as="textarea"
             name="comment"
@@ -142,7 +164,7 @@ export default ({
           </button>
         </VForm>
         <select
-          v-model="sortType"
+          v-model="sort"
           class="block mt-4 py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
         >
           <option value="1">
