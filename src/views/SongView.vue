@@ -1,5 +1,5 @@
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { auth, songsCollection, commentsCollection } from '@/includes/firebase';
 
 export default {
@@ -19,7 +19,8 @@ export default {
     };
   },
   computed: {
-    ...mapState(['isLoggedIn']),
+    ...mapState(['isLoggedIn', 'currentSong']),
+    ...mapGetters(['isSongPlaying']),
     sortedComments() {
       return this.comments.slice().sort((a, b) => {
         if (this.sort === '1') {
@@ -58,7 +59,7 @@ export default {
     this.getComments();
   },
   methods: {
-    ...mapActions(['NEW_SONG']),
+    ...mapActions(['SET_SONG']),
     async sendComment(values, { resetForm }) {
       this.commentInSubmission = true;
       this.commentShowAlert = true;
@@ -105,91 +106,99 @@ export default {
 </script>
 
 <template>
-  <section class="w-full mb-8 py-14 text-center text-white relative">
-    <div
-      class="absolute inset-0 w-full h-full box-border bg-contain music-bg"
-      style="background-image: url(/assets/img/song-header.png)"
-    />
-    <div class="container mx-auto flex items-center">
-      <button
-        type="button"
-        class="z-50 h-24 w-24 text-3xl bg-white text-black rounded-full focus:outline-none"
-        @click.prevent="NEW_SONG(song)"
-      >
-        <i class="fas fa-play" />
-      </button>
-      <div class="z-50 text-left ml-8">
-        <div class="text-3xl font-bold">
-          {{ song.modifiedName }}
+  <main>
+    <section class="w-full mb-8 py-14 text-center text-white relative">
+      <div
+        class="absolute inset-0 w-full h-full box-border bg-contain music-bg"
+        style="background-image: url(/assets/img/song-header.png)"
+      />
+      <div class="container mx-auto flex items-center">
+        <button
+          type="button"
+          class="z-50 h-24 w-24 text-3xl bg-white text-black rounded-full focus:outline-none"
+          :class="{ 'animate-spin': isSongPlaying && song.url === currentSong.url }"
+          @click.prevent="SET_SONG(song)"
+        >
+          <i class="fas fa-play" />
+        </button>
+        <div class="z-50 text-left ml-8">
+          <div class="text-3xl font-bold">
+            {{ song.modifiedName }}
+          </div>
+          <div>{{ song.genre }}</div>
         </div>
-        <div>{{ song.genre }}</div>
       </div>
-    </div>
-  </section>
-  <section class="container mx-auto mt-6">
-    <div class="bg-white rounded border border-gray-200 relative flex flex-col">
-      <div class="px-6 pt-6 pb-5 font-bold border-b border-gray-200">
-        <span class="card-title">Comments ({{ song.commentCount }})</span>
-        <i class="fa fa-comments float-right text-green-400 text-2xl" />
-      </div>
-      <div class="p-6">
-        <div
-          v-if="commentShowAlert"
-          class="mb-4 p-5 font-bold text-white text-center"
-          :class="commentAlertVariant"
-        >
-          {{ commentAlertMessage }}
-        </div>
-        <VForm
-          v-if="isLoggedIn"
-          :validation-schema="schema"
-          @submit="sendComment"
-        >
-          <VField
-            class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded mb-4"
-            placeholder="Your comment here..."
-            as="textarea"
-            name="comment"
-          />
-          <ErrorMessage
-            class="text-red-600"
-            name="comment"
-          />
-          <button
-            type="submit"
-            class="py-1.5 px-3 rounded text-white bg-green-600 block"
-            :disabled="commentInSubmission"
-          >
-            Submit
-          </button>
-        </VForm>
-        <select
-          v-model="sort"
-          class="block mt-4 py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-        >
-          <option value="1">
-            Latest
-          </option>
-          <option value="2">
-            Oldest
-          </option>
-        </select>
-      </div>
-    </div>
-  </section>
-  <ul class="container mx-auto">
-    <li
-      v-for="comment in sortedComments"
-      :key="comment.docID"
-      class="p-6 bg-gray-50 border border-gray-200"
+    </section>
+
+    <section
+      id="comments"
+      class="container mx-auto mt-6"
     >
-      <div class="mb-5">
-        <div class="font-bold">
-          {{ comment.name }}
+      <div class="bg-white rounded border border-gray-200 relative flex flex-col">
+        <div class="px-6 pt-6 pb-5 font-bold border-b border-gray-200">
+          <span class="card-title">Comments ({{ song.commentCount }})</span>
+          <i class="fa fa-comments float-right text-green-400 text-2xl" />
         </div>
-        <div>{{ comment.datePosted }}</div>
+        <div class="p-6">
+          <div
+            v-if="commentShowAlert"
+            class="mb-4 p-5 font-bold text-white text-center"
+            :class="commentAlertVariant"
+          >
+            {{ commentAlertMessage }}
+          </div>
+          <VForm
+            v-if="isLoggedIn"
+            :validation-schema="schema"
+            @submit="sendComment"
+          >
+            <VField
+              class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded mb-4"
+              placeholder="Your comment here..."
+              as="textarea"
+              name="comment"
+            />
+            <ErrorMessage
+              class="text-red-600"
+              name="comment"
+            />
+            <button
+              type="submit"
+              class="py-1.5 px-3 rounded text-white bg-green-600 block"
+              :disabled="commentInSubmission"
+            >
+              Submit
+            </button>
+          </VForm>
+          <select
+            v-model="sort"
+            class="block mt-4 py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
+          >
+            <option value="1">
+              Latest
+            </option>
+            <option value="2">
+              Oldest
+            </option>
+          </select>
+        </div>
       </div>
-      <p>{{ comment.content }}</p>
-    </li>
-  </ul>
+    </section>
+
+    <ul class="container mx-auto">
+      <li
+        v-for="comment in sortedComments"
+        :key="comment.docID"
+        class="p-6 bg-gray-50 border border-gray-200"
+      >
+        <div class="mb-5">
+          <div class="font-bold">
+            {{ comment.name }}
+          </div>
+          <div>{{ comment.datePosted }}</div>
+        </div>
+        <p>{{ comment.content }}</p>
+      </li>
+    </ul>
+  </main>
 </template>

@@ -48,6 +48,7 @@ export default {
   >
     {{ loginAlertMessage }}
   </div>
+
   <VForm
     :validation-schema="loginSchema"
     @submit="login"

@@ -57,6 +57,7 @@ export default {
   >
     {{ registrationAlertMessage }}
   </div>
+
   <VForm
     :validation-schema="registerSchema"
     :initial-values="userData"

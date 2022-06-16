@@ -5,14 +5,18 @@ import {
   LOGOUT,
   INIT_LOGIN,
   REGISTER,
-  NEW_SONG,
+  SET_SONG,
   TOGGLE_SONG,
+  UPDATE_PROGRESS,
+  UPDATE_SEEK,
 } from '@/store/actions.type';
 import {
   TOGGLE_AUTH_MODAL,
   TOGGLE_AUTH,
+  UPDATE_POSITION,
 } from '@/store/mutations.type';
 import { Howl } from 'howler';
+import helper from '@/includes/helper';
 
 export default createStore({
   state: {
@@ -20,6 +24,9 @@ export default createStore({
     isLoggedIn: false,
     currentSong: {},
     sound: {},
+    seek: '00:00',
+    duration: '00:00',
+    playerProgress: '0%',
   },
   getters: {
     isSongPlaying: (state) => (state.sound.playing ? state.sound.playing() : false),
@@ -31,12 +38,17 @@ export default createStore({
     [TOGGLE_AUTH]: (state) => {
       state.isLoggedIn = !state.isLoggedIn;
     },
-    [NEW_SONG]: (state, payload) => {
+    [SET_SONG]: (state, payload) => {
       state.currentSong = payload;
       state.sound = new Howl({
         src: [payload.url],
         html5: true,
       });
+    },
+    [UPDATE_POSITION]: (state) => {
+      state.seek = helper.formatTime(state.sound.seek());
+      state.duration = helper.formatTime(state.sound.duration());
+      state.playerProgress = `${(state.sound.seek() / state.sound.duration()) * 100}%`;
     },
   },
   actions: {
@@ -62,10 +74,7 @@ export default createStore({
     }) => {
       let userCredential = null;
       try {
-        userCredential = await auth.createUserWithEmailAndPassword(
-          email,
-          password,
-        );
+        userCredential = await auth.createUserWithEmailAndPassword(email, password);
       } catch (error) {
         console.log(error);
       }
@@ -83,10 +92,20 @@ export default createStore({
 
       commit('TOGGLE_AUTH');
     },
-    [NEW_SONG]: async ({ state, commit }, payload) => {
-      commit('NEW_SONG', payload);
+    [SET_SONG]: async ({ state, dispatch, commit }, payload) => {
+      if (state.sound instanceof Howl) {
+        state.sound.unload();
+      }
+
+      commit('SET_SONG', payload);
 
       state.sound.play();
+
+      state.sound.on('play', () => {
+        requestAnimationFrame(() => {
+          dispatch('UPDATE_PROGRESS');
+        });
+      });
     },
     [TOGGLE_SONG]: ({ state }) => {
       if (!state.sound.playing) {
@@ -99,7 +118,31 @@ export default createStore({
         state.sound.play();
       }
     },
+    [UPDATE_PROGRESS]: ({ state, dispatch, commit }) => {
+      commit('UPDATE_POSITION');
+
+      if (state.sound.playing()) {
+        requestAnimationFrame(() => {
+          dispatch('UPDATE_PROGRESS');
+        });
+      }
+    },
+    [UPDATE_SEEK]: ({ state, dispatch }, payload) => {
+      if (!state.sound.playing) {
+        return;
+      }
+
+      const { x, width } = payload.currentTarget.getBoundingClientRect();
+      const clickX = payload.clientX - x;
+      const percentage = clickX / width;
+      const seconds = state.sound.duration() * percentage;
+
+      state.sound.seek(seconds);
+
+      state.sound.once('seek', () => {
+        dispatch('UPDATE_PROGRESS');
+      });
+    },
   },
-  modules: {
-  },
+  modules: {},
 });
