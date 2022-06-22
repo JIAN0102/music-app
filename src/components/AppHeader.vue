@@ -5,6 +5,9 @@ export default {
   name: 'AppHeader',
   computed: {
     ...mapState(['isLoggedIn']),
+    currentLocale() {
+      return this.$i18n.locale === 'fr' ? 'English' : 'French';
+    },
   },
   methods: {
     ...mapActions(['LOGOUT']),
@@ -17,6 +20,9 @@ export default {
           name: 'home',
         });
       }
+    },
+    changeLocale() {
+      this.$i18n.locale = this.$i18n.locale === 'fr' ? 'en' : 'fr';
     },
   },
 };
@@ -42,7 +48,7 @@ export default {
               class="px-2 text-white"
               :to="{ name: 'about' }"
             >
-              About
+              {{ $t('menu.about') }}
             </router-link>
           </li>
           <li v-if="!isLoggedIn">
@@ -51,7 +57,7 @@ export default {
               href="#"
               @click.prevent="TOGGLE_AUTH_MODAL"
             >
-              Login / Register
+              {{ $t('menu.auth') }}
             </a>
           </li>
           <template v-else>
@@ -60,7 +66,7 @@ export default {
                 class="px-2 text-white"
                 :to="{ name: 'manage' }"
               >
-                Manage
+                {{ $t('menu.manage') }}
               </router-link>
             </li>
             <li>
@@ -69,10 +75,19 @@ export default {
                 href="#"
                 @click.prevent="logout"
               >
-                Logout
+                {{ $t('menu.logout') }}
               </a>
             </li>
           </template>
+        </ul>
+        <ul class="flex flex-row mt-1 ml-auto">
+          <li>
+            <a
+              class="px-2 text-white"
+              href="#"
+              @click.prevent="changeLocale"
+            >{{ currentLocale }}</a>
+          </li>
         </ul>
       </div>
     </nav>

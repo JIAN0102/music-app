@@ -1,0 +1,19 @@
+{
+  "home": {
+    "listen": "Écoutez de la bonne musique!",
+    "listen_desc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus et dolor mollis, congue augue non, venenatis elit. Nunc justo eros, suscipit ac aliquet imperdiet, venenatis et sapien. Duis sed magna pulvinar, fringilla lorem eget, ullamcorper urna."
+  },
+  "song": {
+    "comment_count": "Aucun Ccommentaires | 1 commentaire | {count} commentaires"
+  },
+  "register": {
+    "accept": "J'accepte les {0} de Musique",
+    "TOS": "Conditions d'utilisation"
+  },
+  "menu": {
+    "about": "à propos",
+    "auth": "Connexion / S'inscrire",
+    "manage": "Gérer",
+    "logout": "Déconnexion"
+  }
+}

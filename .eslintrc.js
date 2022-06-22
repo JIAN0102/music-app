@@ -15,6 +15,7 @@ module.exports = {
     'vue/no-multiple-template-root': 'off',
     'vuejs-accessibility/label-has-for': 'off',
     'vuejs-accessibility/form-control-has-label': 'off',
+    'vuejs-accessibility/click-events-have-key-events': 'off',
     'max-len': 'off',
     'no-restricted-globals': 'off',
     'no-alert': 'off',

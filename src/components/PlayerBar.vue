@@ -3,6 +3,11 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'PlayerBar',
+  data() {
+    return {
+      isMouseDown: false,
+    };
+  },
   computed: {
     ...mapState(['currentSong', 'seek', 'duration', 'playerProgress']),
     ...mapGetters(['isSongPlaying']),
@@ -25,7 +30,7 @@ export default {
             class="fa text-gray-500 text-xl"
             :class="{
               'fa-play': !isSongPlaying,
-              'fa-pause': isSongPlaying
+              'fa-pause': isSongPlaying,
             }"
           />
         </button>
@@ -44,7 +49,6 @@ export default {
         <span
           class="block w-full h-2 rounded m-1 mt-2 bg-gray-200 relative cursor-pointer"
           @click.prevent="UPDATE_SEEK"
-          @keydown.prevent="UPDATE_SEEK"
         >
           <span
             class="absolute top-neg-8 text-gray-800 text-lg"

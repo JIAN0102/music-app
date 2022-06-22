@@ -207,12 +207,14 @@ export default {
         name="tos"
         value="1"
       />
-      <label
+      <i18n-t
         class="inline-block"
         for="acceptTerms"
+        keypath="register.accept"
+        tah="label"
       >
-        Accept terms of service
-      </label>
+        <a href="#">{{ $t('register.TOS') }}</a>
+      </i18n-t>
       <ErrorMessage
         class="block text-red-600"
         name="tos"

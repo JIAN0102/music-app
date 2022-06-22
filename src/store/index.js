@@ -13,6 +13,7 @@ import {
 import {
   TOGGLE_AUTH_MODAL,
   TOGGLE_AUTH,
+  CREATE_SONG,
   UPDATE_POSITION,
 } from '@/store/mutations.type';
 import { Howl } from 'howler';
@@ -32,46 +33,50 @@ export default createStore({
     isSongPlaying: (state) => (state.sound.playing ? state.sound.playing() : false),
   },
   mutations: {
-    [TOGGLE_AUTH_MODAL]: (state) => {
+    [TOGGLE_AUTH_MODAL](state) {
       state.authModalShow = !state.authModalShow;
     },
-    [TOGGLE_AUTH]: (state) => {
+    [TOGGLE_AUTH](state) {
       state.isLoggedIn = !state.isLoggedIn;
     },
-    [SET_SONG]: (state, payload) => {
+    [CREATE_SONG](state, payload) {
       state.currentSong = payload;
       state.sound = new Howl({
         src: [payload.url],
         html5: true,
       });
     },
-    [UPDATE_POSITION]: (state) => {
+    [UPDATE_POSITION](state) {
       state.seek = helper.formatTime(state.sound.seek());
       state.duration = helper.formatTime(state.sound.duration());
       state.playerProgress = `${(state.sound.seek() / state.sound.duration()) * 100}%`;
     },
   },
   actions: {
-    [LOGIN]: async ({ commit }, { email, password }) => {
+    async [LOGIN]({ commit }, { email, password }) {
       await auth.signInWithEmailAndPassword(email, password);
 
       commit('TOGGLE_AUTH');
     },
-    [LOGOUT]: async ({ commit }) => {
+    async [LOGOUT]({ commit }) {
       await auth.signOut();
 
       commit('TOGGLE_AUTH');
     },
-    [INIT_LOGIN]: ({ commit }) => {
+    [INIT_LOGIN]({ commit }) {
       const user = auth.currentUser;
 
       if (user) {
         commit('TOGGLE_AUTH');
       }
     },
-    [REGISTER]: async ({ commit }, {
-      name, email, password, age, country,
-    }) => {
+    async [REGISTER]({ commit }, {
+      name,
+      email,
+      password,
+      age,
+      country,
+    }) {
       let userCredential = null;
       try {
         userCredential = await auth.createUserWithEmailAndPassword(email, password);
@@ -92,12 +97,12 @@ export default createStore({
 
       commit('TOGGLE_AUTH');
     },
-    [SET_SONG]: async ({ state, dispatch, commit }, payload) => {
+    async [SET_SONG]({ state, dispatch, commit }, payload) {
       if (state.sound instanceof Howl) {
         state.sound.unload();
       }
 
-      commit('SET_SONG', payload);
+      commit('CREATE_SONG', payload);
 
       state.sound.play();
 
@@ -107,7 +112,7 @@ export default createStore({
         });
       });
     },
-    [TOGGLE_SONG]: ({ state }) => {
+    [TOGGLE_SONG]({ state }) {
       if (!state.sound.playing) {
         return;
       }
@@ -118,7 +123,7 @@ export default createStore({
         state.sound.play();
       }
     },
-    [UPDATE_PROGRESS]: ({ state, dispatch, commit }) => {
+    [UPDATE_PROGRESS]({ state, dispatch, commit }) {
       commit('UPDATE_POSITION');
 
       if (state.sound.playing()) {
@@ -127,12 +132,13 @@ export default createStore({
         });
       }
     },
-    [UPDATE_SEEK]: ({ state, dispatch }, payload) => {
+    [UPDATE_SEEK]({ state, dispatch }, payload) {
       if (!state.sound.playing) {
         return;
       }
 
       const { x, width } = payload.currentTarget.getBoundingClientRect();
+
       const clickX = payload.clientX - x;
       const percentage = clickX / width;
       const seconds = state.sound.duration() * percentage;

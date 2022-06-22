@@ -126,6 +126,9 @@ export default {
             {{ song.modifiedName }}
           </div>
           <div>{{ song.genre }}</div>
+          <div class="song-price">
+            {{ $n(1, 'currency', 'ja') }}
+          </div>
         </div>
       </div>
     </section>
@@ -136,7 +139,11 @@ export default {
     >
       <div class="bg-white rounded border border-gray-200 relative flex flex-col">
         <div class="px-6 pt-6 pb-5 font-bold border-b border-gray-200">
-          <span class="card-title">Comments ({{ song.commentCount }})</span>
+          <span class="card-title">
+            {{ $tc('song.comment_count', song.commentCount, {
+              count: song.commentCount
+            }) }}
+          </span>
           <i class="fa fa-comments float-right text-green-400 text-2xl" />
         </div>
         <div class="p-6">
