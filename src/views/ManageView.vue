@@ -21,16 +21,57 @@ export default ({
     return {
       songs: [],
       unsavedFlag: false,
+      maxPerLoad: 10,
+      pendingRequest: false,
     };
   },
   async created() {
-    const snapshot = await songsCollection
-      .where('uid', '==', auth.currentUser.uid)
-      .get();
+    this.getSongs();
 
-    snapshot.forEach(this.uploadSong);
+    window.addEventListener('scroll', this.handleScroll);
+  },
+  beforeUnmount() {
+    window.removeEventListener('scroll', this.handleScroll);
   },
   methods: {
+    handleScroll() {
+      const { scrollTop, offsetHeight } = document.documentElement;
+      const { innerHeight } = window;
+      const bottomOfWindow = Math.round(scrollTop) + innerHeight === offsetHeight;
+
+      if (bottomOfWindow) {
+        this.getSongs();
+      }
+    },
+    async getSongs() {
+      if (this.pendingRequest) {
+        return;
+      }
+
+      this.pendingRequest = true;
+
+      let snapshots = null;
+
+      if (this.songs.length) {
+        const lastDoc = await songsCollection
+          .doc(this.songs[this.songs.length - 1].docID)
+          .get();
+        snapshots = await songsCollection
+          .where('uid', '==', auth.currentUser.uid)
+          .startAfter(lastDoc)
+          .limit(this.maxPerLoad)
+          .get();
+      } else {
+        snapshots = await songsCollection
+          .where('uid', '==', auth.currentUser.uid)
+          .limit(this.maxPerLoad)
+          .get();
+      }
+
+      snapshots.forEach(this.uploadSong);
+
+      this.pendingRequest = false;
+    },
     uploadSong(document) {
       const song = {
         docID: document.id,

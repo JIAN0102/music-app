@@ -14,9 +14,23 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-export const auth = firebase.auth();
-export const firestore = firebase.firestore();
-export const usersCollection = firebase.firestore().collection('users');
-export const songsCollection = firebase.firestore().collection('songs');
-export const commentsCollection = firebase.firestore().collection('comments');
-export const storage = firebase.storage();
+const auth = firebase.auth();
+const firestore = firebase.firestore();
+const storage = firebase.storage();
+
+firestore.enablePersistence().catch((error) => {
+  console.log(`Firebase persistence error ${error.code}`);
+});
+
+const usersCollection = firestore.collection('users');
+const songsCollection = firestore.collection('songs');
+const commentsCollection = firestore.collection('comments');
+
+export {
+  auth,
+  firestore,
+  storage,
+  usersCollection,
+  songsCollection,
+  commentsCollection,
+};

@@ -3,17 +3,12 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'PlayerBar',
-  data() {
-    return {
-      isMouseDown: false,
-    };
-  },
   computed: {
-    ...mapState(['currentSong', 'seek', 'duration', 'playerProgress']),
+    ...mapState(['currentSong', 'seek', 'duration', 'playerProgress', 'volume']),
     ...mapGetters(['isSongPlaying']),
   },
   methods: {
-    ...mapActions(['TOGGLE_SONG', 'UPDATE_SEEK']),
+    ...mapActions(['TOGGLE_SONG', 'UPDATE_SEEK', 'UPDATE_VOLUME']),
   },
 };
 </script>
@@ -51,14 +46,30 @@ export default {
           @click.prevent="UPDATE_SEEK"
         >
           <span
-            class="absolute top-neg-8 text-gray-800 text-lg"
+            class="absolute top-neg-8 text-gray-800 text-lg pointer-events-none"
             :style="{ left: playerProgress }"
           >
             <i class="fas fa-circle" />
           </span>
           <span
-            class="block h-2 rounded bg-gradient-to-r from-green-500 to-green-400"
+            class="block h-2 rounded bg-gradient-to-r from-green-500 to-green-400 pointer-events-none"
             :style="{ width: playerProgress }"
+          />
+        </span>
+
+        <span
+          class="block w-full h-2 rounded m-1 mt-2 bg-gray-200 relative cursor-pointer"
+          @click.prevent="UPDATE_VOLUME"
+        >
+          <span
+            class="absolute top-neg-8 text-gray-800 text-lg pointer-events-none"
+            :style="{ left: volume }"
+          >
+            <i class="fas fa-circle" />
+          </span>
+          <span
+            class="block h-2 rounded bg-gradient-to-r from-green-500 to-green-400 pointer-events-none"
+            :style="{ width: volume }"
           />
         </span>
       </div>

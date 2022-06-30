@@ -9,6 +9,7 @@ import {
   TOGGLE_SONG,
   UPDATE_PROGRESS,
   UPDATE_SEEK,
+  UPDATE_VOLUME,
 } from '@/store/actions.type';
 import {
   TOGGLE_AUTH_MODAL,
@@ -28,6 +29,7 @@ export default createStore({
     seek: '00:00',
     duration: '00:00',
     playerProgress: '0%',
+    volume: '100%',
   },
   getters: {
     isSongPlaying: (state) => (state.sound.playing ? state.sound.playing() : false),
@@ -44,6 +46,7 @@ export default createStore({
       state.sound = new Howl({
         src: [payload.url],
         html5: true,
+        volume: 1,
       });
     },
     [UPDATE_POSITION](state) {
@@ -148,6 +151,19 @@ export default createStore({
       state.sound.once('seek', () => {
         dispatch('UPDATE_PROGRESS');
       });
+    },
+    [UPDATE_VOLUME]({ state }, payload) {
+      if (!state.sound.playing) {
+        return;
+      }
+
+      const { x, width } = payload.currentTarget.getBoundingClientRect();
+
+      const clickX = payload.clientX - x;
+      const percentage = clickX / width;
+
+      state.sound.volume(percentage);
+      state.volume = `${percentage * 100}%`;
     },
   },
   modules: {},
