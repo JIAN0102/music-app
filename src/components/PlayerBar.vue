@@ -1,15 +1,27 @@
-<script>
-import { mapState, mapGetters, mapActions } from 'vuex';
+<script setup>
+import { computed } from 'vue';
+import { useStore } from 'vuex';
 
-export default {
-  name: 'PlayerBar',
-  computed: {
-    ...mapState(['currentSong', 'seek', 'duration', 'playerProgress', 'volume']),
-    ...mapGetters(['isSongPlaying']),
-  },
-  methods: {
-    ...mapActions(['TOGGLE_SONG', 'UPDATE_SEEK', 'UPDATE_VOLUME']),
-  },
+const store = useStore();
+
+const currentSong = computed(() => store.state.currentSong);
+const seek = computed(() => store.state.seek);
+const duration = computed(() => store.state.duration);
+const playerProgress = computed(() => store.state.playerProgress);
+const volume = computed(() => store.state.volume);
+
+const isSongPlaying = computed(() => store.getters.isSongPlaying);
+
+const TOGGLE_SONG = () => {
+  store.dispatch('TOGGLE_SONG');
+};
+
+const UPDATE_SEEK = () => {
+  store.dispatch('UPDATE_SEEK');
+};
+
+const UPDATE_VOLUME = () => {
+  store.dispatch('UPDATE_VOLUME');
 };
 </script>
 

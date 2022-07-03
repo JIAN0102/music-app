@@ -1,96 +1,93 @@
-<script>
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
 import { auth, songsCollection } from '@/includes/firebase';
 import UploadSong from '@/components/UploadSong.vue';
 import SongModify from '@/components/SongModify.vue';
 
-export default ({
-  name: 'ManageView',
-  components: {
-    UploadSong,
-    SongModify,
-  },
-  beforeRouteLeave(to, from, next) {
-    if (!this.unsavedFlag) {
-      next();
-    } else {
-      const leave = confirm('You have unsaved changes. Are you sure you want to leave?');
-      next(leave);
-    }
-  },
-  data() {
-    return {
-      songs: [],
-      unsavedFlag: false,
-      maxPerLoad: 10,
-      pendingRequest: false,
-    };
-  },
-  async created() {
-    this.getSongs();
+const songs = ref([]);
+const unsavedFlag = ref(false);
+const maxPerLoad = ref(10);
+const pendingRequest = ref(false);
 
-    window.addEventListener('scroll', this.handleScroll);
-  },
-  beforeUnmount() {
-    window.removeEventListener('scroll', this.handleScroll);
-  },
-  methods: {
-    handleScroll() {
-      const { scrollTop, offsetHeight } = document.documentElement;
-      const { innerHeight } = window;
-      const bottomOfWindow = Math.round(scrollTop) + innerHeight === offsetHeight;
+onBeforeRouteLeave((to, from, next) => {
+  if (!unsavedFlag.value) {
+    next();
+  } else {
+    const leave = confirm('You have unsaved changes. Are you sure you want to leave?');
+    next(leave);
+  }
+});
 
-      if (bottomOfWindow) {
-        this.getSongs();
-      }
-    },
-    async getSongs() {
-      if (this.pendingRequest) {
-        return;
-      }
+const uploadSong = (document) => {
+  const song = {
+    docID: document.id,
+    ...document.data(),
+  };
 
-      this.pendingRequest = true;
+  songs.value.push(song);
+};
 
-      let snapshots = null;
+const getSongs = async () => {
+  if (pendingRequest.value) {
+    return;
+  }
 
-      if (this.songs.length) {
-        const lastDoc = await songsCollection
-          .doc(this.songs[this.songs.length - 1].docID)
-          .get();
-        snapshots = await songsCollection
-          .where('uid', '==', auth.currentUser.uid)
-          .startAfter(lastDoc)
-          .limit(this.maxPerLoad)
-          .get();
-      } else {
-        snapshots = await songsCollection
-          .where('uid', '==', auth.currentUser.uid)
-          .limit(this.maxPerLoad)
-          .get();
-      }
+  pendingRequest.value = true;
 
-      snapshots.forEach(this.uploadSong);
+  let snapshots = null;
 
-      this.pendingRequest = false;
-    },
-    uploadSong(document) {
-      const song = {
-        docID: document.id,
-        ...document.data(),
-      };
+  if (songs.value.length) {
+    const lastDoc = await songsCollection
+      .doc(songs.value[songs.value.length - 1].docID)
+      .get();
+    snapshots = await songsCollection
+      .where('uid', '==', auth.currentUser.uid)
+      .startAfter(lastDoc)
+      .limit(maxPerLoad.value)
+      .get();
+  } else {
+    snapshots = await songsCollection
+      .where('uid', '==', auth.currentUser.uid)
+      .limit(maxPerLoad.value)
+      .get();
+  }
 
-      this.songs.push(song);
-    },
-    editSong(index, { modifiedName, genre }) {
-      this.songs[index].modifiedName = modifiedName;
-      this.songs[index].genre = genre;
-    },
-    deleteSong(index) {
-      this.songs.splice(index, 1);
-    },
-    updateUnsavedFlag(value) {
-      this.unsavedFlag = value;
-    },
-  },
+  snapshots.forEach(uploadSong);
+
+  pendingRequest.value = false;
+};
+
+const handleScroll = () => {
+  const { scrollTop, offsetHeight } = document.documentElement;
+  const { innerHeight } = window;
+  const bottomOfWindow = Math.round(scrollTop) + innerHeight === offsetHeight;
+
+  if (bottomOfWindow) {
+    getSongs();
+  }
+};
+
+const editSong = (index, { modifiedName, genre }) => {
+  songs.value[index].modifiedName = modifiedName;
+  songs.value[index].genre = genre;
+};
+
+const deleteSong = (index) => {
+  songs.value.splice(index, 1);
+};
+const updateUnsavedFlag = (value) => {
+  unsavedFlag.value = value;
+};
+
+onMounted(() => {
+  getSongs();
+
+  window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
 });
 </script>
 

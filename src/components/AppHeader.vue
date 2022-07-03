@@ -1,30 +1,40 @@
-<script>
-import { mapState, mapActions, mapMutations } from 'vuex';
+<script setup>
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 
-export default {
-  name: 'AppHeader',
-  computed: {
-    ...mapState(['isLoggedIn']),
-    currentLocale() {
-      return this.$i18n.locale === 'fr' ? 'English' : 'French';
-    },
-  },
-  methods: {
-    ...mapActions(['LOGOUT']),
-    ...mapMutations(['TOGGLE_AUTH_MODAL']),
-    logout() {
-      this.LOGOUT();
+const route = useRoute();
+const router = useRouter();
 
-      if (this.$route.meta.requiresAuth) {
-        this.$router.push({
-          name: 'home',
-        });
-      }
-    },
-    changeLocale() {
-      this.$i18n.locale = this.$i18n.locale === 'fr' ? 'en' : 'fr';
-    },
-  },
+const store = useStore();
+
+const { t, locale } = useI18n();
+
+const isLoggedIn = computed(() => store.state.isLoggedIn);
+
+const currentLocale = computed(() => (locale.value === 'fr' ? 'English' : 'French'));
+
+const LOGOUT = () => {
+  store.dispatch('LOGOUT');
+};
+
+const TOGGLE_AUTH_MODAL = () => {
+  store.commit('TOGGLE_AUTH_MODAL');
+};
+
+const logout = () => {
+  LOGOUT();
+
+  if (route.meta.requiresAuth) {
+    router.push({
+      name: 'home',
+    });
+  }
+};
+
+const changeLocale = () => {
+  locale.value = locale.value === 'fr' ? 'en' : 'fr';
 };
 </script>
 
@@ -43,21 +53,13 @@ export default {
       </router-link>
       <div class="flex flex-grow items-center">
         <ul class="flex flex-row mt-1">
-          <li>
-            <router-link
-              class="px-2 text-white"
-              :to="{ name: 'about' }"
-            >
-              {{ $t('menu.about') }}
-            </router-link>
-          </li>
           <li v-if="!isLoggedIn">
             <a
               class="px-2 text-white"
               href="#"
               @click.prevent="TOGGLE_AUTH_MODAL"
             >
-              {{ $t('menu.auth') }}
+              {{ t('menu.auth') }}
             </a>
           </li>
           <template v-else>
@@ -66,7 +68,7 @@ export default {
                 class="px-2 text-white"
                 :to="{ name: 'manage' }"
               >
-                {{ $t('menu.manage') }}
+                {{ t('menu.manage') }}
               </router-link>
             </li>
             <li>
@@ -75,7 +77,7 @@ export default {
                 href="#"
                 @click.prevent="logout"
               >
-                {{ $t('menu.logout') }}
+                {{ t('menu.logout') }}
               </a>
             </li>
           </template>

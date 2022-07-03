@@ -1,77 +1,70 @@
-<script>
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { songsCollection } from '@/includes/firebase';
 import SongItem from '@/components/SongItem.vue';
-import IconSecondary from '@/directives/icon-secondary';
+import vIconSecondary from '@/directives/vIconSecondary';
 
-export default {
-  name: 'HomeView',
-  components: {
-    SongItem,
-  },
-  directives: {
-    'icon-secondary': IconSecondary,
-  },
-  data() {
-    return {
-      songs: [],
-      maxPerLoad: 10,
-      pendingRequest: false,
-    };
-  },
-  created() {
-    this.getSongs();
+const songs = ref([]);
+const maxPerLoad = ref(10);
+const pendingRequest = ref(false);
 
-    window.addEventListener('scroll', this.handleScroll);
-  },
-  beforeUnmount() {
-    window.removeEventListener('scroll', this.handleScroll);
-  },
-  methods: {
-    handleScroll() {
-      const { scrollTop, offsetHeight } = document.documentElement;
-      const { innerHeight } = window;
-      const bottomOfWindow = Math.round(scrollTop) + innerHeight === offsetHeight;
+const { t } = useI18n();
 
-      if (bottomOfWindow) {
-        this.getSongs();
-      }
-    },
-    async getSongs() {
-      if (this.pendingRequest) {
-        return;
-      }
+const getSongs = async () => {
+  if (pendingRequest.value) {
+    return;
+  }
 
-      this.pendingRequest = true;
+  pendingRequest.value = true;
 
-      let snapshots = null;
+  let snapshots = null;
 
-      if (this.songs.length) {
-        const lastDoc = await songsCollection
-          .doc(this.songs[this.songs.length - 1].docID)
-          .get();
-        snapshots = await songsCollection
-          .orderBy('modifiedName')
-          .startAfter(lastDoc)
-          .limit(this.maxPerLoad)
-          .get();
-      } else {
-        snapshots = await songsCollection
-          .orderBy('modifiedName')
-          .limit(this.maxPerLoad)
-          .get();
-      }
+  if (songs.value.length) {
+    const lastDoc = await songsCollection
+      .doc(songs.value[songs.value.length - 1].docID)
+      .get();
+    snapshots = await songsCollection
+      .orderBy('modifiedName')
+      .startAfter(lastDoc)
+      .limit(maxPerLoad.value)
+      .get();
+  } else {
+    snapshots = await songsCollection
+      .orderBy('modifiedName')
+      .limit(maxPerLoad.value)
+      .get();
+  }
 
-      snapshots.forEach((document) => {
-        this.songs.push({
-          docID: document.id,
-          ...document.data(),
-        });
-      });
+  snapshots.forEach((document) => {
+    songs.value.push({
+      docID: document.id,
+      ...document.data(),
+    });
+  });
 
-      this.pendingRequest = false;
-    },
-  },
+  pendingRequest.value = false;
 };
+
+const handleScroll = () => {
+  const { scrollTop, offsetHeight } = document.documentElement;
+  const { innerHeight } = window;
+  const bottomOfWindow = Math.round(scrollTop) + innerHeight === offsetHeight;
+
+  if (bottomOfWindow) {
+    getSongs();
+  }
+};
+
+onMounted(() => {
+  getSongs();
+
+  window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <template>
@@ -84,7 +77,7 @@ export default {
       <div class="container mx-auto">
         <div class="text-white main-header-content">
           <h1 class="font-bold text-5xl mb-5">
-            {{ $t('home.listen') }}
+            {{ t('home.listen') }}
           </h1>
           <p class="w-full md:w-8/12 mx-auto">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit.

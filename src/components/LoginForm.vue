@@ -1,42 +1,41 @@
-<script>
-import { mapActions } from 'vuex';
+<script setup>
+import { ref, reactive } from 'vue';
+import { useStore } from 'vuex';
 
-export default {
-  name: 'LoginForm',
-  data() {
-    return {
-      loginSchema: {
-        email: 'required|email',
-        password: 'required|min:6|max:32',
-      },
-      loginInSubmission: false,
-      loginShowAlert: false,
-      loginAlertVariant: 'bg-blue-500',
-      loginAlertMessage: 'Please wait! You are logging you in.',
-    };
-  },
-  methods: {
-    ...mapActions(['LOGIN']),
-    async login(values) {
-      this.loginInSubmission = true;
-      this.loginShowAlert = true;
-      this.loginAlertVariant = 'bg-blue-500';
-      this.loginAlertMessage = 'Please wait! You are logging you in.';
+const store = useStore();
 
-      try {
-        await this.LOGIN(values);
-      } catch (error) {
-        this.loginInSubmission = false;
-        this.loginAlertVariant = 'bg-red-500';
-        this.loginAlertMessage = 'Invalid login details.';
-        return;
-      }
+const loginSchema = reactive({
+  email: 'required|email',
+  password: 'required|min:6|max:32',
+});
+const loginInSubmission = ref(false);
+const loginShowAlert = ref(false);
+const loginAlertVariant = ref('bg-blue-500');
+const loginAlertMessage = ref('Please wait! You are logging you in.');
 
-      this.loginAlertVariant = 'bg-green-500';
-      this.loginAlertMessage = 'Success! You are now logged in.';
-      window.location.reload();
-    },
-  },
+const LOGIN = async (values) => {
+  await store.dispatch('LOGIN', values);
+};
+
+const login = async (values) => {
+  loginInSubmission.value = true;
+  loginShowAlert.value = true;
+  loginAlertVariant.value = 'bg-blue-500';
+  loginAlertMessage.value = 'Please wait! You are logging you in.';
+
+  try {
+    await LOGIN(values);
+    console.log('login');
+  } catch (error) {
+    loginInSubmission.value = false;
+    loginAlertVariant.value = 'bg-red-500';
+    loginAlertMessage.value = 'Invalid login details.';
+    return;
+  }
+
+  loginAlertVariant.value = 'bg-green-500';
+  loginAlertMessage.value = 'Success! You are now logged in.';
+  window.location.reload();
 };
 </script>
 

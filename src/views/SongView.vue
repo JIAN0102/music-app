@@ -1,107 +1,111 @@
-<script>
-import { mapState, mapGetters, mapActions } from 'vuex';
+<script setup>
+import {
+  ref, reactive, computed, watch, onMounted,
+} from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import { auth, songsCollection, commentsCollection } from '@/includes/firebase';
 
-export default {
-  name: 'SongView',
-  data() {
-    return {
-      song: {},
-      schema: {
-        comment: 'required|min:3',
-      },
-      comments: [],
-      commentInSubmission: false,
-      commentShowAlert: false,
-      commentAlertVariant: 'bg-blue-500',
-      commentAlertMessage: 'Please wait! Your comment is being submitted.',
-      sort: '1',
-    };
-  },
-  computed: {
-    ...mapState(['isLoggedIn', 'currentSong']),
-    ...mapGetters(['isSongPlaying']),
-    sortedComments() {
-      return this.comments.slice().sort((a, b) => {
-        if (this.sort === '1') {
-          return new Date(b.datePosted) - new Date(a.datePosted);
-        }
-        return new Date(a.datePosted) - new Date(b.datePosted);
-      });
-    },
-  },
-  watch: {
-    sort(newVal) {
-      if (newVal === this.$route.query.sort) {
-        return;
-      }
+const route = useRoute();
+const router = useRouter();
 
-      this.$router.push({
-        query: { sort: newVal },
-      });
-    },
-  },
-  async created() {
-    const snapshop = await songsCollection.doc(this.$route.params.id).get();
+const store = useStore();
 
-    if (!snapshop.exists) {
-      this.$router.push({
-        name: 'home',
-      });
-      return;
-    }
+const { t, n } = useI18n();
 
-    const { sort } = this.$route.query;
+const song = ref({});
+const schema = reactive({
+  comment: 'required|min:3',
+});
+const comments = ref([]);
+const commentInSubmission = ref(false);
+const commentShowAlert = ref(false);
+const commentAlertVariant = ref('bg-blue-500');
+const commentAlertMessage = ref('Please wait! Your comment is being submitted.');
+const sort = ref('1');
 
-    this.sort = sort === '1' || sort === '2' ? sort : '1';
+const isLoggedIn = computed(() => store.state.isLoggedIn);
+const currentSong = computed(() => store.state.currentSong);
+const isSongPlaying = computed(() => store.getters.isSongPlaying);
+const setSong = (payload) => store.dispatch('SET_SONG', payload);
 
-    this.song = snapshop.data();
-    this.getComments();
-  },
-  methods: {
-    ...mapActions(['SET_SONG']),
-    async sendComment(values, { resetForm }) {
-      this.commentInSubmission = true;
-      this.commentShowAlert = true;
-      this.commentAlertVariant = 'bg-blue-500';
-      this.commentAlertMessage = 'Please wait! Your comment is being submitted.';
+const sortedComments = computed(() => comments.value.slice().sort((a, b) => {
+  if (sort.value === '1') {
+    return new Date(b.datePosted) - new Date(a.datePosted);
+  }
+  return new Date(a.datePosted) - new Date(b.datePosted);
+}));
 
-      const comment = {
-        content: values.comment,
-        datePosted: new Date().toString(),
-        songID: this.$route.params.id,
-        name: auth.currentUser.displayName,
-        uid: auth.currentUser.uid,
-      };
+watch(sort, (newVal) => {
+  if (newVal === route.query.sort) {
+    return;
+  }
 
-      await commentsCollection.add(comment);
+  router.push({
+    query: { sort: newVal },
+  });
+});
 
-      this.song.commentCount += 1;
-      await songsCollection.doc(this.$route.params.id).update({
-        commentCount: this.song.commentCount,
-      });
+const getComments = async () => {
+  const snapshots = await commentsCollection.where('songID', '==', route.params.id).get();
 
-      this.getComments();
+  comments.value = [];
 
-      this.commentInSubmission = false;
-      this.commentAlertVariant = 'bg-green-500';
-      this.commentAlertMessage = 'Comment added!';
+  snapshots.forEach((document) => {
+    comments.value.push({
+      docID: document.id,
+      ...document.data(),
+    });
+  });
+};
 
-      resetForm();
-    },
-    async getComments() {
-      const snapshots = await commentsCollection.where('songID', '==', this.$route.params.id).get();
+onMounted(async () => {
+  const snapshop = await songsCollection.doc(route.params.id).get();
 
-      this.comments = [];
+  if (!snapshop.exists) {
+    router.push({
+      name: 'home',
+    });
+    return;
+  }
 
-      snapshots.forEach((document) => {
-        this.comments.push({
-          docID: document.id,
-          ...document.data(),
-        });
-      });
-    },
-  },
+  const { nowSort } = route.query;
+
+  sort.value = nowSort === '1' || nowSort === '2' ? nowSort : '1';
+
+  song.value = snapshop.data();
+  getComments();
+});
+
+const sendComment = async (values, { resetForm }) => {
+  commentInSubmission.value = true;
+  commentShowAlert.value = true;
+  commentAlertVariant.value = 'bg-blue-500';
+  commentAlertMessage.value = 'Please wait! Your comment is being submitted.';
+
+  const comment = {
+    content: values.comment,
+    datePosted: new Date().toString(),
+    songID: route.params.id,
+    name: auth.currentUser.displayName,
+    uid: auth.currentUser.uid,
+  };
+
+  await commentsCollection.add(comment);
+
+  song.commentCount += 1;
+  await songsCollection.doc(route.params.id).update({
+    commentCount: song.value.commentCount,
+  });
+
+  getComments();
+
+  commentInSubmission.value = false;
+  commentAlertVariant.value = 'bg-green-500';
+  commentAlertMessage.value = 'Comment added!';
+
+  resetForm();
 };
 </script>
 
@@ -112,22 +116,22 @@ export default {
         class="absolute inset-0 w-full h-full box-border bg-contain music-bg"
         style="background-image: url(/assets/img/song-header.png)"
       />
-      <div class="container mx-auto flex items-center">
+      <div class="relative container mx-auto flex items-center">
         <button
           type="button"
-          class="z-50 h-24 w-24 text-3xl bg-white text-black rounded-full focus:outline-none"
+          class="h-24 w-24 text-3xl bg-white text-black rounded-full focus:outline-none"
           :class="{ 'animate-spin': isSongPlaying && song.url === currentSong.url }"
-          @click.prevent="SET_SONG(song)"
+          @click.prevent="setSong(song)"
         >
           <i class="fas fa-play" />
         </button>
-        <div class="z-50 text-left ml-8">
+        <div class="text-left ml-8">
           <div class="text-3xl font-bold">
             {{ song.modifiedName }}
           </div>
           <div>{{ song.genre }}</div>
           <div class="song-price">
-            {{ $n(1, 'currency', 'ja') }}
+            {{ n(1, 'currency', 'ja') }}
           </div>
         </div>
       </div>
@@ -140,7 +144,7 @@ export default {
       <div class="bg-white rounded border border-gray-200 relative flex flex-col">
         <div class="px-6 pt-6 pb-5 font-bold border-b border-gray-200">
           <span class="card-title">
-            {{ $tc('song.comment_count', song.commentCount, {
+            {{ t('song.comment_count', song.commentCount, {
               count: song.commentCount
             }) }}
           </span>

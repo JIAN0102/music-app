@@ -1,23 +1,19 @@
-<script>
-import { mapActions } from 'vuex';
+<script setup>
+import { onMounted } from 'vue';
+import { useStore } from 'vuex';
 import AppHeader from '@/components/AppHeader.vue';
 import PlayerBar from '@/components/PlayerBar.vue';
 import AuthModal from '@/components/AuthModal.vue';
 
-export default {
-  name: 'App',
-  components: {
-    AppHeader,
-    PlayerBar,
-    AuthModal,
-  },
-  created() {
-    this.INIT_LOGIN();
-  },
-  methods: {
-    ...mapActions(['INIT_LOGIN']),
-  },
+const store = useStore();
+
+const initLogin = () => {
+  store.dispatch('INIT_LOGIN');
 };
+
+onMounted(() => {
+  initLogin();
+});
 </script>
 
 <template>

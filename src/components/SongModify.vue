@@ -1,70 +1,67 @@
-<script>
+<script setup>
+import { ref, reactive } from 'vue';
 import { songsCollection, storage } from '@/includes/firebase';
 
-export default {
-  name: 'SongModify',
-  props: {
-    song: {
-      type: Object,
-      required: true,
-    },
-    index: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  song: {
+    type: Object,
+    required: true,
   },
-  emits: ['edit-song', 'delete-song', 'update-unsaved-flag'],
-  data() {
-    return {
-      showEditForm: false,
-      schema: {
-        modifiedName: 'required',
-        genre: 'alpha_spaces',
-      },
-      editSongInSubmission: false,
-      editSongShowAlert: false,
-      editSongAlertVariant: 'bg-blue-500',
-      editSongAlertMessage: 'Please wait! Updating song info.',
-    };
+  index: {
+    type: Number,
+    required: true,
   },
-  methods: {
-    async editSong(values) {
-      this.editSongInSubmission = true;
-      this.editSongShowAlert = true;
-      this.editSongAlertVariant = 'bg-blue-500';
-      this.editSongAlertMessage = 'Please wait! Updating song info.';
+});
 
-      try {
-        await songsCollection.doc(this.song.docID).update(values);
-      } catch (error) {
-        this.editSongInSubmission = false;
-        this.editSongAlertVariant = 'bg-red-500';
-        this.editSongAlertMessage = 'Something went wrong! Try again later.';
-        return;
-      }
+const emit = defineEmits(['edit-song', 'delete-song', 'update-unsaved-flag']);
 
-      this.$emit('edit-song', this.index, values);
-      this.$emit('update-unsaved-flag', false);
+const showEditForm = ref(false);
+const schema = reactive({
+  modifiedName: 'required',
+  genre: 'alpha_spaces',
+});
+const editSongInSubmission = ref(false);
+const editSongShowAlert = ref(false);
+const editSongAlertVariant = ref('bg-blue-500');
+const editSongAlertMessage = ref('Please wait! Updating song info.');
 
-      this.editSongInSubmission = false;
-      this.editSongAlertVariant = 'bg-green-500';
-      this.editSongAlertMessage = 'Success!';
-    },
-    async deleteSong() {
-      const storageRef = storage.ref();
-      const songRef = storageRef.child(`songs/${this.song.originalName}`);
+const editSong = async (values) => {
+  editSongInSubmission.value = true;
+  editSongShowAlert.value = true;
+  editSongAlertVariant.value = 'bg-blue-500';
+  editSongAlertMessage.value = 'Please wait! Updating song info.';
 
-      await songRef.delete();
+  try {
+    await songsCollection.doc(props.song.docID).update(values);
+  } catch (error) {
+    editSongInSubmission.value = false;
+    editSongAlertVariant.value = 'bg-red-500';
+    editSongAlertMessage.value = 'Something went wrong! Try again later.';
+    return;
+  }
 
-      await songsCollection.doc(this.song.docID).delete();
+  emit('edit-song', props.index, values);
+  emit('update-unsaved-flag', false);
 
-      this.$emit('delete-song', this.index);
-    },
-    cancelEditSong() {
-      this.showEditForm = false;
-      this.$emit('update-unsaved-flag', false);
-    },
-  },
+  editSongInSubmission.value = false;
+  editSongAlertVariant.value = 'bg-green-500';
+  editSongAlertMessage.value = 'Success!';
+};
+
+const deleteSong = async () => {
+  const storageRef = storage.ref();
+  const songRef = storageRef.child(`songs/${props.song.originalName}`);
+
+  await songRef.delete();
+
+  await songsCollection.doc(props.song.docID).delete();
+
+  emit('delete-song', props.index);
+};
+
+const cancelEditSong = () => {
+  showEditForm.value = false;
+  emit('update-unsaved-flag', false);
 };
 </script>
 

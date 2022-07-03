@@ -1,51 +1,51 @@
-<script>
-import { mapActions } from 'vuex';
+<script setup>
+import { ref, reactive } from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 
-export default {
-  name: 'RegisterForm',
-  data() {
-    return {
-      registerSchema: {
-        name: 'required|min:3|max:100|alpha_spaces',
-        email: 'required|min:3|max:100|email',
-        age: 'required|min_value:18|max_value:100',
-        password: 'required|min:6|max:32',
-        confirmPassword: 'password_mismatch:@password',
-        country: 'required|country_excluded:Antarctica',
-        tos: 'tos',
-      },
-      userData: {
-        country: 'USA',
-      },
-      registrationInSubmission: false,
-      registrationShowAlert: false,
-      registrationAlertVariant: 'bg-blue-500',
-      registrationAlertMessage: 'Please wait! Your account is being created.',
-    };
-  },
-  methods: {
-    ...mapActions(['REGISTER']),
-    async register(values) {
-      this.registrationInSubmission = true;
-      this.registrationShowAlert = true;
-      this.registrationAlertVariant = 'bg-blue-500';
-      this.registrationAlertMessage = 'Please wait! Your account is being created.';
+const store = useStore();
 
-      try {
-        await this.REGISTER(values);
-      } catch (error) {
-        this.registrationInSubmission = false;
-        this.registrationAlertVariant = 'bg-red-500';
-        this.registrationAlertMessage = 'An unexpected error occured. Please try again later.';
-        return;
-      }
+const { t } = useI18n();
 
-      this.registrationInSubmission = false;
-      this.registrationAlertVariant = 'bg-green-500';
-      this.registrationAlertMessage = 'Success! Your account has being created.';
-      window.location.reload();
-    },
-  },
+const registerSchema = reactive({
+  name: 'required|min:3|max:100|alpha_spaces',
+  email: 'required|min:3|max:100|email',
+  age: 'required|min_value:18|max_value:100',
+  password: 'required|min:6|max:32',
+  confirmPassword: 'password_mismatch:@password',
+  country: 'required|country_excluded:Antarctica',
+  tos: 'tos',
+});
+const userData = reactive({
+  country: 'USA',
+});
+const registrationInSubmission = ref(false);
+const registrationShowAlert = ref(false);
+const registrationAlertVariant = ref('bg-blue-500');
+const registrationAlertMessage = ref('Please wait! Your account is being created.');
+
+const REGISTER = async (values) => {
+  await store.dispatch('REGISTER', values);
+};
+
+const register = async (values) => {
+  registrationInSubmission.value = true;
+  registrationShowAlert.value = true;
+  registrationAlertVariant.value = 'bg-blue-500';
+  registrationAlertMessage.value = 'Please wait! Your account is being created.';
+
+  try {
+    await REGISTER(values);
+  } catch (error) {
+    registrationInSubmission.value = false;
+    registrationAlertVariant.value = 'bg-red-500';
+    registrationAlertMessage.value = 'An unexpected error occured. Please try again later.';
+  }
+
+  registrationInSubmission.value = false;
+  registrationAlertVariant.value = 'bg-green-500';
+  registrationAlertMessage.value = 'Success! Your account has being created.';
+  window.location.reload();
 };
 </script>
 
@@ -213,7 +213,7 @@ export default {
         keypath="register.accept"
         tah="label"
       >
-        <a href="#">{{ $t('register.TOS') }}</a>
+        <a href="#">{{ t('register.TOS') }}</a>
       </i18n-t>
       <ErrorMessage
         class="block text-red-600"

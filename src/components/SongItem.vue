@@ -1,17 +1,10 @@
-<script>
-export default {
-  name: 'SongItem',
-  props: {
-    song: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+defineProps({
+  song: {
+    type: Object,
+    required: true,
   },
-  data() {
-    return {
-    };
-  },
-};
+});
 </script>
 
 <template>

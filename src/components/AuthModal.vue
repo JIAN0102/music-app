@@ -1,25 +1,17 @@
-<script>
-import { mapState, mapMutations } from 'vuex';
+<script setup>
+import { ref, computed } from 'vue';
+import { useStore } from 'vuex';
 import LoginForm from '@/components/LoginForm.vue';
 import RegisterForm from '@/components/RegisterForm.vue';
 
-export default {
-  name: 'AuthModal',
-  components: {
-    LoginForm,
-    RegisterForm,
-  },
-  data() {
-    return {
-      authType: 'login',
-    };
-  },
-  computed: {
-    ...mapState(['authModalShow']),
-  },
-  methods: {
-    ...mapMutations(['TOGGLE_AUTH_MODAL']),
-  },
+const store = useStore();
+
+const authType = ref('login');
+
+const authModalShow = computed(() => store.state.authModalShow);
+
+const TOGGLE_AUTH_MODAL = () => {
+  store.commit('TOGGLE_AUTH_MODAL');
 };
 </script>
 
