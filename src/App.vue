@@ -1,15 +1,12 @@
 <script setup>
 import { onMounted } from 'vue';
-import { useStore } from 'vuex';
+import { useAuthStore } from '@/stores/auth';
 import AppHeader from '@/components/AppHeader.vue';
 import PlayerBar from '@/components/PlayerBar.vue';
 import AuthModal from '@/components/AuthModal.vue';
 
-const store = useStore();
-
-const initLogin = () => {
-  store.dispatch('INIT_LOGIN');
-};
+const authStore = useAuthStore();
+const { initLogin } = authStore;
 
 onMounted(() => {
   initLogin();

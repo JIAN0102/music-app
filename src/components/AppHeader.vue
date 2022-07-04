@@ -1,30 +1,23 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '@/stores/auth';
 import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
 const router = useRouter();
 
-const store = useStore();
+const authStore = useAuthStore();
+const { isLoggedIn } = storeToRefs(authStore);
+const { logout, toggleAuthModal } = authStore;
 
 const { t, locale } = useI18n();
 
-const isLoggedIn = computed(() => store.state.isLoggedIn);
-
 const currentLocale = computed(() => (locale.value === 'fr' ? 'English' : 'French'));
 
-const LOGOUT = () => {
-  store.dispatch('LOGOUT');
-};
-
-const TOGGLE_AUTH_MODAL = () => {
-  store.commit('TOGGLE_AUTH_MODAL');
-};
-
-const logout = () => {
-  LOGOUT();
+const userLogout = () => {
+  logout();
 
   if (route.meta.requiresAuth) {
     router.push({
@@ -57,7 +50,7 @@ const changeLocale = () => {
             <a
               class="px-2 text-white"
               href="#"
-              @click.prevent="TOGGLE_AUTH_MODAL"
+              @click.prevent="toggleAuthModal"
             >
               {{ t('menu.auth') }}
             </a>
@@ -75,7 +68,7 @@ const changeLocale = () => {
               <a
                 class="px-2 text-white"
                 href="#"
-                @click.prevent="logout"
+                @click.prevent="userLogout"
               >
                 {{ t('menu.logout') }}
               </a>

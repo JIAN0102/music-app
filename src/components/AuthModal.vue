@@ -1,18 +1,15 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
+import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '@/stores/auth';
 import LoginForm from '@/components/LoginForm.vue';
 import RegisterForm from '@/components/RegisterForm.vue';
 
-const store = useStore();
+const authStore = useAuthStore();
+const { authModalShow } = storeToRefs(authStore);
+const { toggleAuthModal } = authStore;
 
 const authType = ref('login');
-
-const authModalShow = computed(() => store.state.authModalShow);
-
-const TOGGLE_AUTH_MODAL = () => {
-  store.commit('TOGGLE_AUTH_MODAL');
-};
 </script>
 
 <template>
@@ -39,7 +36,7 @@ const TOGGLE_AUTH_MODAL = () => {
             <button
               type="button"
               class="modal-close cursor-pointer z-50"
-              @click.prevent="TOGGLE_AUTH_MODAL"
+              @click.prevent="toggleAuthModal"
             >
               <i class="fas fa-times" />
             </button>

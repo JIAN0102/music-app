@@ -19,6 +19,7 @@ module.exports = {
     'max-len': 'off',
     'no-restricted-globals': 'off',
     'no-alert': 'off',
+    'import/prefer-default-export': 'off',
   },
 
   overrides: [

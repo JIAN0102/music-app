@@ -1,8 +1,9 @@
 <script setup>
 import { ref, reactive } from 'vue';
-import { useStore } from 'vuex';
+import { useAuthStore } from '@/stores/auth';
 
-const store = useStore();
+const authStore = useAuthStore();
+const { login } = authStore;
 
 const loginSchema = reactive({
   email: 'required|email',
@@ -13,19 +14,14 @@ const loginShowAlert = ref(false);
 const loginAlertVariant = ref('bg-blue-500');
 const loginAlertMessage = ref('Please wait! You are logging you in.');
 
-const LOGIN = async (values) => {
-  await store.dispatch('LOGIN', values);
-};
-
-const login = async (values) => {
+const userLogin = async (values) => {
   loginInSubmission.value = true;
   loginShowAlert.value = true;
   loginAlertVariant.value = 'bg-blue-500';
   loginAlertMessage.value = 'Please wait! You are logging you in.';
 
   try {
-    await LOGIN(values);
-    console.log('login');
+    await login(values);
   } catch (error) {
     loginInSubmission.value = false;
     loginAlertVariant.value = 'bg-red-500';
@@ -50,7 +46,7 @@ const login = async (values) => {
 
   <VForm
     :validation-schema="loginSchema"
-    @submit="login"
+    @submit="userLogin"
   >
     <div class="mb-3">
       <label

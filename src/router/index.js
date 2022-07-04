@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import store from '@/store';
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '@/stores/auth';
 import HomeView from '@/views/HomeView.vue';
 import ManageView from '@/views/ManageView.vue';
 import SongView from '@/views/SongView.vue';
@@ -36,9 +37,11 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+  const { isLoggedIn } = storeToRefs(authStore);
   if (!to.meta.requiresAuth) {
     next();
-  } else if (store.state.isLoggedIn) {
+  } else if (isLoggedIn) {
     next();
   } else {
     next({ name: 'home' });

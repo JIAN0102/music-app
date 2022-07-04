@@ -1,9 +1,10 @@
 <script setup>
 import { ref, reactive } from 'vue';
-import { useStore } from 'vuex';
+import { useAuthStore } from '@/stores/auth';
 import { useI18n } from 'vue-i18n';
 
-const store = useStore();
+const authStore = useAuthStore();
+const { register } = authStore;
 
 const { t } = useI18n();
 
@@ -24,18 +25,14 @@ const registrationShowAlert = ref(false);
 const registrationAlertVariant = ref('bg-blue-500');
 const registrationAlertMessage = ref('Please wait! Your account is being created.');
 
-const REGISTER = async (values) => {
-  await store.dispatch('REGISTER', values);
-};
-
-const register = async (values) => {
+const userRegister = async (values) => {
   registrationInSubmission.value = true;
   registrationShowAlert.value = true;
   registrationAlertVariant.value = 'bg-blue-500';
   registrationAlertMessage.value = 'Please wait! Your account is being created.';
 
   try {
-    await REGISTER(values);
+    await register(values);
   } catch (error) {
     registrationInSubmission.value = false;
     registrationAlertVariant.value = 'bg-red-500';
@@ -61,7 +58,7 @@ const register = async (values) => {
   <VForm
     :validation-schema="registerSchema"
     :initial-values="userData"
-    @submit="register"
+    @submit="userRegister"
   >
     <div class="mb-3">
       <label

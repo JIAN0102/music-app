@@ -1,7 +1,8 @@
 import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
-import store from './store';
+// import store from './store';
 import VeeValidate from './includes/validation';
 import { auth } from './includes/firebase';
 import i18n from './includes/i18n';
@@ -14,10 +15,12 @@ let app;
 
 auth.onAuthStateChanged(() => {
   if (!app) {
+    const pinia = createPinia();
     app = createApp(App);
 
     app.use(i18n);
-    app.use(store);
+    // app.use(store);
+    app.use(pinia);
     app.use(router);
     app.use(VeeValidate);
     app.directive('icon', Icon);

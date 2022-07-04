@@ -3,14 +3,20 @@ import {
   ref, reactive, computed, watch, onMounted,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '@/stores/auth';
+import { useSongStore } from '@/stores/song';
 import { useI18n } from 'vue-i18n';
 import { auth, songsCollection, commentsCollection } from '@/includes/firebase';
 
 const route = useRoute();
 const router = useRouter();
 
-const store = useStore();
+const authStore = useAuthStore();
+const songStore = useSongStore();
+const { isLoggedIn } = storeToRefs(authStore);
+const { currentSong, isSongPlaying } = storeToRefs(songStore);
+const { setSong } = songStore;
 
 const { t, n } = useI18n();
 
@@ -24,11 +30,6 @@ const commentShowAlert = ref(false);
 const commentAlertVariant = ref('bg-blue-500');
 const commentAlertMessage = ref('Please wait! Your comment is being submitted.');
 const sort = ref('1');
-
-const isLoggedIn = computed(() => store.state.isLoggedIn);
-const currentSong = computed(() => store.state.currentSong);
-const isSongPlaying = computed(() => store.getters.isSongPlaying);
-const setSong = (payload) => store.dispatch('SET_SONG', payload);
 
 const sortedComments = computed(() => comments.value.slice().sort((a, b) => {
   if (sort.value === '1') {

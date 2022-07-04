@@ -76,6 +76,7 @@ const editSong = (index, { modifiedName, genre }) => {
 const deleteSong = (index) => {
   songs.value.splice(index, 1);
 };
+
 const updateUnsavedFlag = (value) => {
   unsavedFlag.value = value;
 };

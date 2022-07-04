@@ -1,28 +1,12 @@
 <script setup>
-import { computed } from 'vue';
-import { useStore } from 'vuex';
+import { storeToRefs } from 'pinia';
+import { useSongStore } from '@/stores/song';
 
-const store = useStore();
-
-const currentSong = computed(() => store.state.currentSong);
-const seek = computed(() => store.state.seek);
-const duration = computed(() => store.state.duration);
-const playerProgress = computed(() => store.state.playerProgress);
-const volume = computed(() => store.state.volume);
-
-const isSongPlaying = computed(() => store.getters.isSongPlaying);
-
-const TOGGLE_SONG = () => {
-  store.dispatch('TOGGLE_SONG');
-};
-
-const UPDATE_SEEK = () => {
-  store.dispatch('UPDATE_SEEK');
-};
-
-const UPDATE_VOLUME = () => {
-  store.dispatch('UPDATE_VOLUME');
-};
+const songStore = useSongStore();
+const {
+  currentSong, seek, duration, playerProgress, volume, isSongPlaying,
+} = storeToRefs(songStore);
+const { toggleSong, updateSeek, updateVolume } = songStore;
 </script>
 
 <template>
@@ -31,7 +15,7 @@ const UPDATE_VOLUME = () => {
       <div class="float-left w-7 h-7 leading-3">
         <button
           type="button"
-          @click.prevent="TOGGLE_SONG"
+          @click.prevent="toggleSong"
         >
           <i
             class="fa text-gray-500 text-xl"
@@ -55,7 +39,7 @@ const UPDATE_VOLUME = () => {
         </div>
         <span
           class="block w-full h-2 rounded m-1 mt-2 bg-gray-200 relative cursor-pointer"
-          @click.prevent="UPDATE_SEEK"
+          @click.prevent="updateSeek"
         >
           <span
             class="absolute top-neg-8 text-gray-800 text-lg pointer-events-none"
@@ -71,7 +55,7 @@ const UPDATE_VOLUME = () => {
 
         <span
           class="block w-full h-2 rounded m-1 mt-2 bg-gray-200 relative cursor-pointer"
-          @click.prevent="UPDATE_VOLUME"
+          @click.prevent="updateVolume"
         >
           <span
             class="absolute top-neg-8 text-gray-800 text-lg pointer-events-none"
